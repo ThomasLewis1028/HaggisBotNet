@@ -64,7 +64,7 @@ namespace HaggisBotNet
                 player.CurrentStreak = 0;
                 RouletteGame.Round = Rand.Next(0, 6);
                 RouletteGame.Played = new List<long>();
-                message = "<@" + player.Id + "> *BANG*";
+                message = "<@" + player.Id + ">\n<:ded:741179781953093652><:bang:741180034626093067><:six_shooter:741153306243760209>";
             }
             else
             {
@@ -75,7 +75,7 @@ namespace HaggisBotNet
                     : player.HighestStreak;
                 RouletteGame.Round--;
                 RouletteGame.Played.Add(player.Id);
-                message = "<@" + player.Id + "> *CLICK*";
+                message = "<@" + player.Id + ">\n<:stevedamn:392273843034783745><:six_shooter:741153306243760209>";
             }
 
             RouletteGame.LastPlayed = DateTime.Now;
@@ -136,16 +136,17 @@ namespace HaggisBotNet
 
         public String SpinBarrel()
         {
-            var test = DateTime.Now - RouletteGame.LastPlayed;
             if (DateTime.Now - RouletteGame.LastPlayed >= TimeSpan.FromMinutes(5))
             {
                 RouletteGame.LastPlayed = DateTime.Now;
                 RouletteGame.Played = new List<long>();
                 RouletteGame.Round = Rand.Next(0, 5);
-                return "*SPIN*";
+                return "*SPIN* <:six_shooter:741153306243760209>";
             }
 
-            return "Please wait 5 minutes from " + RouletteGame.LastPlayed;
+            var waitTime = TimeSpan.FromMinutes(5).Subtract(DateTime.Now.Subtract(RouletteGame.LastPlayed));
+            
+            return "Please wait " + waitTime.ToString("m\\:ss") ;
         }
 
         public IRoulette LoadRoulette()
