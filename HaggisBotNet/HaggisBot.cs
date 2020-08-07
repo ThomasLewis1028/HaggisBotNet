@@ -96,9 +96,9 @@ namespace HaggisBotNet
                 return;
 
             if (sm.Content.ToLower() == "ping")
-                sm.Channel.SendMessageAsync("Pong");
+                await sm.Channel.SendMessageAsync("Pong");
             else if (sm.Content.ToLower() == "pong")
-                sm.Channel.SendMessageAsync("Ping");
+                await sm.Channel.SendMessageAsync("Ping");
 
             if ((long) sm.Channel.Id == _gamesChannel)
                 switch (sm.Content)
