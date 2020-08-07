@@ -12,18 +12,18 @@ namespace HaggisBotNet
     internal class Roulette
     {
         private static readonly Random Rand = new Random();
-        public readonly string _gameDataPath;
-        public readonly string _rouletteGamePath;
-        public IRoulette RouletteGame;
+        public readonly string GameDataPath;
+        public readonly string RouletteGamePath;
+        public readonly IRoulette RouletteGame;
 
         public Roulette(string path)
         {
-            _gameDataPath = path;
-            _rouletteGamePath = _gameDataPath + "/roulette.json";
+            GameDataPath = path;
+            RouletteGamePath = GameDataPath + "/roulette.json";
 
-            if (!File.Exists(_rouletteGamePath))
+            if (!File.Exists(RouletteGamePath))
             {
-                File.Create(_rouletteGamePath).Close();
+                File.Create(RouletteGamePath).Close();
                 RouletteGame = new IRoulette()
                 {
                     Round = Rand.Next(0, 6),
@@ -78,6 +78,7 @@ namespace HaggisBotNet
                 message = "<@" + player.Id + "> *CLICK*";
             }
 
+            RouletteGame.LastPlayed = DateTime.Now;
             SerializeData(RouletteGame);
             return message;
         }
@@ -114,23 +115,37 @@ namespace HaggisBotNet
             eb.Title = "Russian Roulette Leaderboard";
 
             eb.AddField("Highest Current Streak: ",
-                RouletteGame.Players.Find(p => p.Id == RouletteGame.HighestCurrent).Name + " - " +
-                RouletteGame.Players.Find(p => p.Id == RouletteGame.HighestCurrent).CurrentStreak);
+                RouletteGame.Players.Find(p => p.Id == RouletteGame.HighestCurrent)?.Name + " - " +
+                RouletteGame.Players.Find(p => p.Id == RouletteGame.HighestCurrent)?.CurrentStreak);
             eb.AddField("Highest Streak Ever: ",
-                RouletteGame.Players.Find(p => p.Id == RouletteGame.HighestTop).Name + " - " +
-                RouletteGame.Players.Find(p => p.Id == RouletteGame.HighestTop).HighestStreak);
+                RouletteGame.Players.Find(p => p.Id == RouletteGame.HighestTop)?.Name + " - " +
+                RouletteGame.Players.Find(p => p.Id == RouletteGame.HighestTop)?.HighestStreak);
             eb.AddField("Most Survives: ",
-                RouletteGame.Players.Find(p => p.Id == RouletteGame.HighestSurvives).Name + " - " +
-                RouletteGame.Players.Find(p => p.Id == RouletteGame.HighestSurvives).Survives);
+                RouletteGame.Players.Find(p => p.Id == RouletteGame.HighestSurvives)?.Name + " - " +
+                RouletteGame.Players.Find(p => p.Id == RouletteGame.HighestSurvives)?.Survives);
             eb.AddField("Most Deaths: ",
-                RouletteGame.Players.Find(p => p.Id == RouletteGame.HighestDeaths).Name + " - " +
-                RouletteGame.Players.Find(p => p.Id == RouletteGame.HighestDeaths).Deaths);
+                RouletteGame.Players.Find(p => p.Id == RouletteGame.HighestDeaths)?.Name + " - " +
+                RouletteGame.Players.Find(p => p.Id == RouletteGame.HighestDeaths)?.Deaths);
             eb.AddField("Highest K/D: ",
-                RouletteGame.Players.Find(p => p.Id == RouletteGame.HighestKD).Name + " - " +
-                RouletteGame.Players.Find(p => p.Id == RouletteGame.HighestKD).KillDeath);
+                RouletteGame.Players.Find(p => p.Id == RouletteGame.HighestKD)?.Name + " - " +
+                RouletteGame.Players.Find(p => p.Id == RouletteGame.HighestKD)?.KillDeath);
             
 
             return ("<@" + id + "> Here is the leaderboard", eb.Build());
+        }
+
+        public String SpinBarrel()
+        {
+            var test = DateTime.Now - RouletteGame.LastPlayed;
+            if (DateTime.Now - RouletteGame.LastPlayed >= TimeSpan.FromMinutes(5))
+            {
+                RouletteGame.LastPlayed = DateTime.Now;
+                RouletteGame.Played = new List<long>();
+                RouletteGame.Round = Rand.Next(0, 5);
+                return "*SPIN*";
+            }
+
+            return "Please wait 5 minutes from " + RouletteGame.LastPlayed;
         }
 
         public IRoulette LoadRoulette()
@@ -138,7 +153,7 @@ namespace HaggisBotNet
             // Parse the file into a JObject
             var roulette =
                 JObject.Parse(
-                    File.ReadAllText(_gameDataPath));
+                    File.ReadAllText(RouletteGamePath));
 
             // Deserialize the JObject into a Universe and return it
             return JsonConvert.DeserializeObject<IRoulette>(roulette.ToString());
@@ -147,7 +162,7 @@ namespace HaggisBotNet
         private void SerializeData(IRoulette roulette)
         {
             // Set the path to the file and write it, overwriting the previous file if it exists.
-            var path = _rouletteGamePath;
+            var path = RouletteGamePath;
             using var file =
                 File.CreateText(path);
             var serializer = new JsonSerializer();

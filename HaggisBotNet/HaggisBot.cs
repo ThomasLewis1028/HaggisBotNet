@@ -17,44 +17,49 @@ namespace HaggisBotNet
     {
         private static Games _games;
         private static Roulette _roulette;
-        
+
         // Properties file
         private static readonly JObject Prop =
             JObject.Parse(
                 File.ReadAllText(@"properties.json"));
-        
+
         // Get the token out of the properties folder
         private readonly string _token;
         private readonly long _gamesChannel;
         private readonly long _haggisId;
-        
+
         private readonly Regex _rouletteRegex =
             new Regex("^!(rr)($| .*)", RegexOptions.IgnoreCase);
+
         private readonly Regex _rouletteStatsRegex =
             new Regex("^!(rrStats)($| .*)", RegexOptions.IgnoreCase);
+
         private readonly Regex _rouletteLeadRegex =
             new Regex("^!(rrLB|rrLeaderBoard|rrLead)($| .*)", RegexOptions.IgnoreCase);
-        
+
+        private readonly Regex _rouletteSpin =
+            new Regex("^!(rrSpin)($| .*)", RegexOptions.IgnoreCase);
+
         // Discord config files
         private DiscordSocketClient _client;
-        
+
         public HaggisBot(bool test)
         {
             // _token =
             //     test ? (string) Prop.GetValue("tokenTest") : (string) Prop.GetValue("token");
-            
+
             _token = (string) Prop.GetValue("token");
 
             _gamesChannel = (long) Prop.GetValue("gamesChannel");
 
             _haggisId = (long) Prop.GetValue("Admin")[0].First.First;
-            
+
             _roulette = new Roulette(GamePath);
 
             // _dmChannel =
             //     test ? (long) Prop.GetValue("Test DM") : (long) Prop.GetValue("DM Channel");
         }
-        
+
         private static string GamePath
         {
             get
@@ -67,7 +72,7 @@ namespace HaggisBotNet
                 return Path.GetDirectoryName(path) + "/GameData";
             }
         }
-        
+
         public async Task MainAsync()
         {
             var config = new DiscordSocketConfig {MessageCacheSize = 100};
@@ -90,24 +95,29 @@ namespace HaggisBotNet
             if (sm.Author.IsBot)
                 return;
 
-            if ((long) sm.Author.Id == _haggisId && sm.Content.ToLower() == "ping")
+            if (sm.Content.ToLower() == "ping")
                 sm.Channel.SendMessageAsync("Pong");
+            else if (sm.Content.ToLower() == "pong")
+                sm.Channel.SendMessageAsync("Ping");
 
-            switch (sm.Content)
-            {
-                case var content when _rouletteRegex.IsMatch(content):
-                    await sm.Channel.SendMessageAsync(_roulette.PlayRound(sm));
-                    break;
-                case var content when _rouletteStatsRegex.IsMatch(content):
-                    var statsReturn = _roulette.GetStats((long) sm.Author.Id);
-                    await sm.Channel.SendMessageAsync(statsReturn.Item1, false, statsReturn.Item2);
-                    break;
-                case var content when _rouletteLeadRegex.IsMatch(content):
-                    var leadReturn = _roulette.GetLeaders((long) sm.Author.Id);
-                    await sm.Channel.SendMessageAsync(leadReturn.Item1, false, leadReturn.Item2);
-                    break;
-            }
-            
+            if ((long) sm.Channel.Id == _gamesChannel)
+                switch (sm.Content)
+                {
+                    case var content when _rouletteRegex.IsMatch(content):
+                        await sm.Channel.SendMessageAsync(_roulette.PlayRound(sm));
+                        break;
+                    case var content when _rouletteStatsRegex.IsMatch(content):
+                        var statsReturn = _roulette.GetStats((long) sm.Author.Id);
+                        await sm.Channel.SendMessageAsync(statsReturn.Item1, false, statsReturn.Item2);
+                        break;
+                    case var content when _rouletteLeadRegex.IsMatch(content):
+                        var leadReturn = _roulette.GetLeaders((long) sm.Author.Id);
+                        await sm.Channel.SendMessageAsync(leadReturn.Item1, false, leadReturn.Item2);
+                        break;
+                    case var content when _rouletteSpin.IsMatch(content):
+                        await sm.Channel.SendMessageAsync(_roulette.SpinBarrel());
+                        break;
+                }
         }
     }
 }
