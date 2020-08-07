@@ -17,7 +17,7 @@ namespace HaggisBotNet.Models
 
         public long HighestDeaths => Players.OrderByDescending(p => p.Deaths).First().Id;
 
-        public Double HighestKD => Players.OrderByDescending(p => p.KillDeath).First().Id;
+        public long HighestKD => Players.OrderByDescending(p => p.KillDeath).First().Id;
 
         public List<Player> Players { get; set; }
 

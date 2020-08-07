@@ -140,7 +140,7 @@ namespace HaggisBotNet
             {
                 RouletteGame.LastPlayed = DateTime.Now;
                 RouletteGame.Played = new List<long>();
-                RouletteGame.Round = Rand.Next(0, 5);
+                RouletteGame.Round = Rand.Next(0, 6);
                 return "*SPIN* <:six_shooter:741153306243760209>";
             }
 
