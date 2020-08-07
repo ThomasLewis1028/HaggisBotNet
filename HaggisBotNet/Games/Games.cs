@@ -4,7 +4,7 @@ using HaggisBotNet.Models;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
-namespace HaggisBotNet
+namespace Games.HaggisBotNet
 {
     public class Games
     {

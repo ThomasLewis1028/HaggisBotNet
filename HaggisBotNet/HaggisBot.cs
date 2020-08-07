@@ -9,13 +9,14 @@ using System.Threading.Tasks;
 using Discord;
 using Discord.Rest;
 using Discord.WebSocket;
+using Games.HaggisBotNet;
 using Newtonsoft.Json.Linq;
 
 namespace HaggisBotNet
 {
     internal class HaggisBot
     {
-        private static Games _games;
+        private static Games.HaggisBotNet.Games _games;
         private static Roulette _roulette;
 
         // Properties file
