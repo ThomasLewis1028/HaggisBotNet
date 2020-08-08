@@ -91,7 +91,7 @@ namespace HaggisBotNet
 
             await _client.LoginAsync(TokenType.Bot, _token);
             await _client.StartAsync();
-            await _client.SetGameAsync("No Universe Loaded");
+            await _client.SetGameAsync("Ruining lives since the Nineteen Ninety..Fives..");
 
             await Console.Out.WriteLineAsync("DiscordBot Connected");
 
