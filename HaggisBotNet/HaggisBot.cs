@@ -5,6 +5,7 @@ using System.Linq;
 using System.Reflection;
 using System.Text;
 using System.Text.RegularExpressions;
+using System.Threading;
 using System.Threading.Tasks;
 using Discord;
 using Discord.Rest;
@@ -16,7 +17,7 @@ namespace HaggisBotNet
 {
     internal class HaggisBot
     {
-        private static Games.HaggisBotNet.Games _games;
+        // private static Games.HaggisBotNet.Games _games;
         private static Roulette _roulette;
 
         // Properties file
@@ -40,6 +41,12 @@ namespace HaggisBotNet
 
         private readonly Regex _rouletteSpin =
             new Regex("^!(rrSpin)($| .*)", RegexOptions.IgnoreCase);
+
+        private readonly Regex _rouletteWhip =
+            new Regex("^!(rrPistolWhip|rrWhip|rrPW) <@!(\\d+)>($| .*)", RegexOptions.IgnoreCase);
+        
+        private readonly Regex _rouletteWhipCounter =
+            new Regex("^!(rrCounterWhip|rrCW)", RegexOptions.IgnoreCase);
 
         // Discord config files
         private DiscordSocketClient _client;
@@ -96,6 +103,9 @@ namespace HaggisBotNet
             if (sm.Author.IsBot)
                 return;
 
+            // if ((long) sm.Author.Id == _haggisId)
+            //     Console.Out.WriteLine(sm.Content);
+
             if (sm.Content.ToLower() == "ping")
                 await sm.Channel.SendMessageAsync("Pong");
             else if (sm.Content.ToLower() == "pong")
@@ -108,7 +118,7 @@ namespace HaggisBotNet
                         await sm.Channel.SendMessageAsync(_roulette.PlayRound(sm));
                         break;
                     case var content when _rouletteStatsRegex.IsMatch(content):
-                        var statsReturn = _roulette.GetStats((long) sm.Author.Id);
+                        var statsReturn = _roulette.GetStats((Int64) sm.Author.Id);
                         await sm.Channel.SendMessageAsync(statsReturn.Item1, false, statsReturn.Item2);
                         break;
                     case var content when _rouletteLeadRegex.IsMatch(content):
@@ -117,6 +127,12 @@ namespace HaggisBotNet
                         break;
                     case var content when _rouletteSpin.IsMatch(content):
                         await sm.Channel.SendMessageAsync(_roulette.SpinBarrel());
+                        break;
+                    case var content when _rouletteWhip.IsMatch(content):
+                        _roulette.PistolWhip(sm).RunSynchronously();
+                        break;
+                    case var content when _rouletteWhipCounter.IsMatch(content):
+                        await sm.Channel.SendMessageAsync(_roulette.CounterWhip(sm));
                         break;
                 }
         }

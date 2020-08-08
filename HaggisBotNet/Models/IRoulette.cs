@@ -9,26 +9,26 @@ namespace HaggisBotNet.Models
     {
         public Int32 Round { get; set; }
 
-        public long HighestCurrent => Players.OrderByDescending(p => p.CurrentStreak).First().Id;
+        public Int64 HighestCurrent => Players.OrderByDescending(p => p.CurrentStreak).First().Id;
 
-        public long HighestTop => Players.OrderByDescending(p => p.HighestStreak).First().Id;
+        public Int64 HighestTop => Players.OrderByDescending(p => p.HighestStreak).First().Id;
 
-        public long HighestSurvives => Players.OrderByDescending(p => p.Survives).First().Id;
+        public Int64 HighestSurvives => Players.OrderByDescending(p => p.Survives).First().Id;
 
-        public long HighestDeaths => Players.OrderByDescending(p => p.Deaths).First().Id;
+        public Int64 HighestDeaths => Players.OrderByDescending(p => p.Deaths).First().Id;
 
-        public long HighestKD => Players.OrderByDescending(p => p.KillDeath).First().Id;
+        public Int64 HighestKD => Players.OrderByDescending(p => p.KillDeath).First().Id;
 
         public List<Player> Players { get; set; }
 
-        public List<long> Played { get; set; }
+        public List<Int64> Played { get; set; }
         
         public DateTime LastPlayed { get; set; }
     }
 
     public class Player
     {
-        public long Id { get; set; }
+        public Int64 Id { get; set; }
 
         public String Name { get; set; }
 
@@ -46,5 +46,9 @@ namespace HaggisBotNet.Models
             : Deaths == 0
                 ? Survives
                 : (Double) Survives / Deaths;
+        
+        public DateTime LastPistolWhip { get; set; }
+        
+        public Boolean Whipped { get; set; }
     }
 }
