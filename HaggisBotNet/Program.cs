@@ -10,7 +10,7 @@ namespace HaggisBotNet
         {
             try
             {
-                var bot = new HaggisBot(args[0] == "-test");
+                var bot = new HaggisBot(args.Length > 0 && args[0] == "-test");
                 bot?.MainAsync();
 
 
