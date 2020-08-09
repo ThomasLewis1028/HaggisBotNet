@@ -31,7 +31,7 @@ namespace HaggisBotNet
             new Regex("^!(rr)($| .*)", RegexOptions.IgnoreCase);
 
         private readonly Regex _rouletteStatsRegex =
-            new Regex("^!(rrStats)($| .*)", RegexOptions.IgnoreCase);
+            new Regex("^!(rrStats|rrS)($| .*)", RegexOptions.IgnoreCase);
 
         private readonly Regex _rouletteLeadRegex =
             new Regex("^!(rrLB|rrLeaderBoard|rrLead)($| .*)", RegexOptions.IgnoreCase);
@@ -44,6 +44,9 @@ namespace HaggisBotNet
         
         private readonly Regex _rouletteWhipCounter =
             new Regex("^!(rrCounterWhip|rrCW)", RegexOptions.IgnoreCase);
+        
+        private readonly Regex _help = 
+            new Regex("^!(help)", RegexOptions.IgnoreCase);
 
         // Discord config files
         private DiscordSocketClient _client;
@@ -107,6 +110,25 @@ namespace HaggisBotNet
                 await sm.Channel.SendMessageAsync("Pong");
             else if (sm.Content.ToLower() == "pong")
                 await sm.Channel.SendMessageAsync("Ping");
+
+            if (_help.IsMatch(sm.Content))
+            {
+                EmbedBuilder eb = new EmbedBuilder();
+                eb.Title = "Help";
+                eb.Description = "All commands are case insensitive";
+                eb.Color = Color.Gold;
+                eb.AddField("Help", "help");
+                eb.AddField("Play Roulette", "rr");
+                eb.AddField("Roulette Stats", "rrStats | rrS");
+                eb.AddField("Roulette Leaderboard", "rrLB | rrLeaderBoard | rrLead");
+                eb.AddField("Roulette Spin","rrSpin");
+                eb.AddField("Roulette Pistol Whip", "rrPistolWhip | rrWhip | rrPW");
+                eb.AddField("Roulette Counter Whip", "rrCounterWhip | rrCW");
+                eb.AddField("Ping", "Pong");
+
+                _logger.Info("Sending help list: " + sm.Content);
+                await sm.Channel.SendMessageAsync(null, false, eb.Build());
+            }
 
             if ((long) sm.Channel.Id == _gamesChannel)
                 try
