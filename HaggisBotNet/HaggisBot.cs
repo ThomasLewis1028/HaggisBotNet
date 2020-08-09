@@ -1,14 +1,9 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Reflection;
-using System.Text;
 using System.Text.RegularExpressions;
-using System.Threading;
 using System.Threading.Tasks;
 using Discord;
-using Discord.Rest;
 using Discord.WebSocket;
 using Games.HaggisBotNet;
 using Newtonsoft.Json.Linq;
@@ -19,6 +14,8 @@ namespace HaggisBotNet
     {
         // private static Games.HaggisBotNet.Games _games;
         private static Roulette _roulette;
+        
+        private readonly NLog.Logger _logger = NLog.LogManager.GetCurrentClassLogger();
 
         // Properties file
         private static readonly JObject Prop =
@@ -93,7 +90,7 @@ namespace HaggisBotNet
             await _client.StartAsync();
             await _client.SetGameAsync("Ruining lives since the Nineteen Ninety..Fives..");
 
-            await Console.Out.WriteLineAsync("DiscordBot Connected");
+            _logger.Info("DiscordBot Connected");
 
             await Task.Delay(-1);
         }
@@ -112,28 +109,41 @@ namespace HaggisBotNet
                 await sm.Channel.SendMessageAsync("Ping");
 
             if ((long) sm.Channel.Id == _gamesChannel)
-                switch (sm.Content)
+                try
                 {
-                    case var content when _rouletteRegex.IsMatch(content):
-                        await sm.Channel.SendMessageAsync(_roulette.PlayRound(sm));
-                        break;
-                    case var content when _rouletteStatsRegex.IsMatch(content):
-                        var statsReturn = _roulette.GetStats((Int64) sm.Author.Id);
-                        await sm.Channel.SendMessageAsync(statsReturn.Item1, false, statsReturn.Item2);
-                        break;
-                    case var content when _rouletteLeadRegex.IsMatch(content):
-                        var leadReturn = _roulette.GetLeaders((long) sm.Author.Id);
-                        await sm.Channel.SendMessageAsync(leadReturn.Item1, false, leadReturn.Item2);
-                        break;
-                    case var content when _rouletteSpin.IsMatch(content):
-                        await sm.Channel.SendMessageAsync(_roulette.SpinBarrel());
-                        break;
-                    case var content when _rouletteWhip.IsMatch(content):
-                        _roulette.PistolWhip(sm).RunSynchronously();
-                        break;
-                    case var content when _rouletteWhipCounter.IsMatch(content):
-                        await sm.Channel.SendMessageAsync(_roulette.CounterWhip(sm));
-                        break;
+                    switch (sm.Content)
+                    {
+                        case var content when _rouletteRegex.IsMatch(content):
+                            _logger.Info("Playing round of roulette: " + content);
+                            await sm.Channel.SendMessageAsync(_roulette.PlayRound(sm));
+                            break;
+                        case var content when _rouletteStatsRegex.IsMatch(content):
+                            _logger.Info("Getting roulette stats: " + content);
+                            var statsReturn = _roulette.GetStats((Int64) sm.Author.Id);
+                            await sm.Channel.SendMessageAsync(statsReturn.Item1, false, statsReturn.Item2);
+                            break;
+                        case var content when _rouletteLeadRegex.IsMatch(content):
+                            _logger.Info("Getting roulette leaderboard: " + content);
+                            var leadReturn = _roulette.GetLeaders((long) sm.Author.Id);
+                            await sm.Channel.SendMessageAsync(leadReturn.Item1, false, leadReturn.Item2);
+                            break;
+                        case var content when _rouletteSpin.IsMatch(content):
+                            _logger.Info("Spinning roulette barrel: " + content);
+                            await sm.Channel.SendMessageAsync(_roulette.SpinBarrel());
+                            break;
+                        case var content when _rouletteWhip.IsMatch(content):
+                            _logger.Info("Pistol Whipping Roullete: " + content);
+                            _roulette.PistolWhip(sm).RunSynchronously();
+                            break;
+                        case var content when _rouletteWhipCounter.IsMatch(content):
+                            await sm.Channel.SendMessageAsync(_roulette.CounterWhip(sm));
+                            break;
+                    }
+                }
+                catch (Exception e)
+                {
+                    _logger.Error(e);
+                    await sm.Channel.SendMessageAsync(e.Message);
                 }
         }
     }
