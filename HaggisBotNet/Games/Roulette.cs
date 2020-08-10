@@ -239,7 +239,7 @@ namespace Games.HaggisBotNet
 
             return "Please wait " + waitTime.ToString("m\\:ss");
         }
-
+ 
         public IRoulette LoadRoulette()
         {
             // Parse the file into a JObject
