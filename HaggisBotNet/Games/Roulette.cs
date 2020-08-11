@@ -214,7 +214,7 @@ namespace Games.HaggisBotNet
             target.Whipped = true;
             await sm.Channel.SendMessageAsync("<@" + targetId + "> You've been pistol whipped by <@" + player.Id +
                                               ">! You have 30 seconds to respond!");
-            Task.Delay(30000).Wait();
+            await Task.Delay(30000);
             if (target.Whipped)
             {
                 target.Whipped = false;
