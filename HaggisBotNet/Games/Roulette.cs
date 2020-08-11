@@ -90,6 +90,83 @@ namespace Games.HaggisBotNet
             return message;
         }
 
+        public String ShootPlayer(SocketMessage sm)
+        {
+            string message;
+            var targetId = Int64.Parse(sm.Content.Split(new[] {"<@!", ">"}, StringSplitOptions.RemoveEmptyEntries)[1]);
+            
+            if (!RouletteGame.Players.Exists(p => p.Id == (Int64) sm.Author.Id))
+            {
+                return "<@" + (Int64) sm.Author.Id + "> You haven't played Roulette yet";
+            }
+            
+            Player player = RouletteGame.Players.Find(p => p.Id == (Int64) sm.Author.Id);
+            
+            if (RouletteGame.Played.Contains(player.Id))
+            {
+                return "<@" + player.Id +
+                                                  "> You've already played this round, put the damn gun down";
+            }
+            
+            
+            if (DateTime.Now - player.LastKill < TimeSpan.FromHours(24))
+            {
+                return "<@" + (Int64) sm.Author.Id + "> Please wait " + TimeSpan
+                                                      .FromHours(24)
+                                                      .Subtract(DateTime.Now.Subtract(player.LastKill))
+                                                      .ToString(@"hh\:mm\:ss")
+                                                  + " to shoot someone again";
+            }
+            
+            if (!RouletteGame.Played.Contains(player.Id) ||
+                !RouletteGame.Players.Exists(t => t.Id == targetId))
+            {
+                player.LastKill = DateTime.Now;
+                return "<@" + player.Id +
+                       "> You tried shooting someone that hasn't played! How dare you..";
+            }
+            
+            Player target =
+                RouletteGame.Players.Find(p => p.Id == targetId);
+            
+            player.LastKill = DateTime.Now;
+
+            if (RouletteGame.Round == 0)
+            {
+                target.Deaths++;
+                target.CurrentStreak = 0;
+
+                player.Survives++;
+                player.CurrentStreak++;
+                player.Kills++;
+                
+                RouletteGame.Round = Rand.Next(0, 6);
+                RouletteGame.Played = new List<Int64>();
+                message = "<@" + player.Id +
+                          ">\n<:ded:741179781953093652><:bang:741180034626093067><:buttgun:642486383440691200>";
+            }
+            else
+            {
+                target.Survives++;
+                target.CurrentStreak++;
+                target.HighestStreak = target.CurrentStreak > target.HighestStreak
+                    ? target.CurrentStreak
+                    : target.HighestStreak;
+
+                player.Deaths++;
+                player.CurrentStreak++;
+                RouletteGame.Played.Add(player.Id);
+                
+                RouletteGame.Round--;
+                message = "<@" + target.Id + "> <@" + player.Id + ">\n<:stevedamn:392273843034783745><:buttgun:642486383440691200>";
+            }
+            
+            
+            RouletteGame.LastPlayed = DateTime.Now;
+            SerializeData(RouletteGame);
+            return message;
+        }
+
         public async Task PistolWhip(SocketMessage sm)
         {
             var targetId = Int64.Parse(sm.Content.Split(new[] {"<@!", ">"}, StringSplitOptions.RemoveEmptyEntries)[1]);
@@ -100,17 +177,19 @@ namespace Games.HaggisBotNet
                 return;
             }
 
-            if (RouletteGame.Played.Contains((Int64) sm.Author.Id))
+            Player player = RouletteGame.Players.Find(p => p.Id == (Int64) sm.Author.Id);
+            
+            if (RouletteGame.Played.Contains(player.Id))
             {
-                await sm.Channel.SendMessageAsync("<@" + (Int64) sm.Author.Id + "> You've already played this round, put the damn gun down");
+                await sm.Channel.SendMessageAsync("<@" + player.Id +
+                                                  "> You've already played this round, put the damn gun down");
                 return;
             }
 
-            Player player = RouletteGame.Players.Find(p => p.Id == (Int64) sm.Author.Id);
 
             if (DateTime.Now - player.LastPistolWhip < TimeSpan.FromHours(24))
             {
-                await sm.Channel.SendMessageAsync("<@" + (Int64) sm.Author.Id + "> Please wait " + TimeSpan
+                await sm.Channel.SendMessageAsync("<@" + player.Id + "> Please wait " + TimeSpan
                                                       .FromHours(24)
                                                       .Subtract(DateTime.Now.Subtract(player.LastPistolWhip))
                                                       .ToString(@"hh\:mm\:ss")
@@ -122,7 +201,7 @@ namespace Games.HaggisBotNet
                 !RouletteGame.Players.Exists(t => t.Id == targetId))
             {
                 player.LastPistolWhip = DateTime.Now;
-                await sm.Channel.SendMessageAsync("<@" + (Int64) sm.Author.Id +
+                await sm.Channel.SendMessageAsync("<@" + player.Id +
                                                   "> You tried pistol whipping someone that hasn't played! How dare you..");
                 return;
             }
@@ -140,6 +219,7 @@ namespace Games.HaggisBotNet
             {
                 target.Whipped = false;
                 target.Deaths++;
+                player.Kills++;
                 RouletteGame.Round = Rand.Next(0, 6);
                 RouletteGame.Played = new List<Int64>();
                 SerializeData(RouletteGame);
@@ -189,6 +269,7 @@ namespace Games.HaggisBotNet
             eb.AddField("Highest Streak: ", player.HighestStreak);
             eb.AddField("Survives: ", player.Survives);
             eb.AddField("Deaths", player.Deaths);
+            eb.AddField("Kills", player.Kills);
             eb.AddField("K/D: ", player.KillDeath);
 
             return ("<@" + id + "> Here are your stats", eb.Build());
@@ -217,9 +298,15 @@ namespace Games.HaggisBotNet
             eb.AddField("Most Deaths: ",
                 RouletteGame.Players.Find(p => p.Id == RouletteGame.HighestDeaths)?.Name + " - " +
                 RouletteGame.Players.Find(p => p.Id == RouletteGame.HighestDeaths)?.Deaths);
+            eb.AddField("Most Kills: ",
+                RouletteGame.Players.Find(p => p.Id == RouletteGame.HighestKills)?.Name + " - " +
+                RouletteGame.Players.Find(p => p.Id == RouletteGame.HighestKills)?.Kills);
             eb.AddField("Highest K/D: ",
                 RouletteGame.Players.Find(p => p.Id == RouletteGame.HighestKD)?.Name + " - " +
                 RouletteGame.Players.Find(p => p.Id == RouletteGame.HighestKD)?.KillDeath);
+            eb.AddField("Lowest K/D: ",
+                RouletteGame.Players.Find(p => p.Id == RouletteGame.LowestKD)?.Name + " - " +
+                RouletteGame.Players.Find(p => p.Id == RouletteGame.LowestKD)?.KillDeath);
 
 
             return ("<@" + id + "> Here is the leaderboard", eb.Build());
@@ -239,7 +326,7 @@ namespace Games.HaggisBotNet
 
             return "Please wait " + waitTime.ToString("m\\:ss");
         }
-        
+
         public IRoulette LoadRoulette()
         {
             // Parse the file into a JObject

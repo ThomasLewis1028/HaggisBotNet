@@ -17,7 +17,11 @@ namespace HaggisBotNet.Models
 
         public Int64 HighestDeaths => Players.OrderByDescending(p => p.Deaths).First().Id;
 
+        public Int64 HighestKills => Players.OrderByDescending(p => p.Kills).First().Id;
+
         public Int64 HighestKD => Players.OrderByDescending(p => p.KillDeath).First().Id;
+        
+        public Int64 LowestKD => Players.OrderByDescending(p => p.KillDeath).Last().Id;
 
         public List<Player> Players { get; set; }
 
@@ -39,6 +43,8 @@ namespace HaggisBotNet.Models
         public Int32 Survives { get; set; }
 
         public Int32 Deaths { get; set; }
+        
+        public Int32 Kills { get; set; }
 
         [JsonIgnore]
         public Double KillDeath => Survives == 0
@@ -48,6 +54,8 @@ namespace HaggisBotNet.Models
                 : (Double) Survives / Deaths;
         
         public DateTime LastPistolWhip { get; set; }
+        
+        public DateTime LastKill { get; set; }
         
         public Boolean Whipped { get; set; }
     }

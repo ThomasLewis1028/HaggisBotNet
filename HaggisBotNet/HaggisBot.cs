@@ -45,6 +45,9 @@ namespace HaggisBotNet
         private readonly Regex _rouletteWhipCounter =
             new Regex("^!(rrCounterWhip|rrCW)", RegexOptions.IgnoreCase);
         
+        private readonly Regex _rouletteShootPlayer =
+            new Regex("^!(rrShootPlayer|rrSP) <@!(\\d+)>($| .*)", RegexOptions.IgnoreCase);
+        
         private readonly Regex _help = 
             new Regex("^!(help)", RegexOptions.IgnoreCase);
 
@@ -115,15 +118,16 @@ namespace HaggisBotNet
             {
                 EmbedBuilder eb = new EmbedBuilder();
                 eb.Title = "Help";
-                eb.Description = "All commands are case insensitive";
+                eb.Description = "All commands are case insensitive and are preceded with !";
                 eb.Color = Color.Gold;
                 eb.AddField("Help", "help");
                 eb.AddField("Play Roulette", "rr");
                 eb.AddField("Roulette Stats", "rrStats | rrS");
                 eb.AddField("Roulette Leaderboard", "rrLB | rrLeaderBoard | rrLead");
                 eb.AddField("Roulette Spin","rrSpin");
-                eb.AddField("Roulette Pistol Whip", "rrPistolWhip | rrWhip | rrPW");
+                eb.AddField("Roulette Pistol Whip", "(rrPistolWhip | rrWhip | rrPW) @<user>");
                 eb.AddField("Roulette Counter Whip", "rrCounterWhip | rrCW");
+                eb.AddField("Roulette Shooter Player", "(rrSP | rrShootPlayer) @<user>");
                 eb.AddField("Ping", "Pong");
 
                 _logger.Info("Sending help list: " + sm.Content);
@@ -158,7 +162,12 @@ namespace HaggisBotNet
                             _roulette.PistolWhip(sm).RunSynchronously();
                             break;
                         case var content when _rouletteWhipCounter.IsMatch(content):
+                            _logger.Info("Counter Whipping Roulette: " + content);
                             await sm.Channel.SendMessageAsync(_roulette.CounterWhip(sm));
+                            break;
+                        case var content when _rouletteShootPlayer.IsMatch(content):
+                            _logger.Info("Shooting Player Roulette: " + content);
+                            await sm.Channel.SendMessageAsync(_roulette.ShootPlayer(sm));
                             break;
                     }
                 }
