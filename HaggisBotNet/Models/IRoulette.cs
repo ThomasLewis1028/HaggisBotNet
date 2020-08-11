@@ -51,7 +51,7 @@ namespace HaggisBotNet.Models
             ? 0
             : Deaths == 0
                 ? Survives
-                : (Double) Survives / Deaths;
+                : Math.Round((Double) Survives / Deaths, 2);
         
         public DateTime LastPistolWhip { get; set; }
         
