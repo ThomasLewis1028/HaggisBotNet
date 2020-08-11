@@ -127,7 +127,7 @@ namespace HaggisBotNet
                 eb.AddField("Roulette Spin","rrSpin");
                 // eb.AddField("Roulette Pistol Whip", "(rrPistolWhip | rrWhip | rrPW) @<user>");
                 // eb.AddField("Roulette Counter Whip", "rrCounterWhip | rrCW");
-                eb.AddField("Roulette Shooter Player", "(rrSP | rrShootPlayer) @<user>");
+                eb.AddField("Roulette Shoot Player", "(rrSP | rrShootPlayer) @<user>");
                 eb.AddField("Ping", "Pong");
 
                 _logger.Info("Sending help list: " + sm.Content);

@@ -118,7 +118,7 @@ namespace Games.HaggisBotNet
                                                   + " to shoot someone again";
             }
             
-            if (!RouletteGame.Played.Contains(player.Id) ||
+            if (!RouletteGame.Played.Contains(targetId) ||
                 !RouletteGame.Players.Exists(t => t.Id == targetId))
             {
                 player.LastKill = DateTime.Now;
@@ -197,7 +197,7 @@ namespace Games.HaggisBotNet
                 return;
             }
 
-            if (!RouletteGame.Played.Contains(player.Id) ||
+            if (!RouletteGame.Played.Contains(targetId) ||
                 !RouletteGame.Players.Exists(t => t.Id == targetId))
             {
                 player.LastPistolWhip = DateTime.Now;
