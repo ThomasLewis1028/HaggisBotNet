@@ -134,8 +134,8 @@ namespace Games.HaggisBotNet
             SerializeData(RouletteGame);
             target.Whipped = true;
             await sm.Channel.SendMessageAsync("<@" + targetId + "> You've been pistol whipped by <@" + player.Id +
-                                              ">! You have 5 seconds to respond!");
-            Task.Delay(5000).Wait();
+                                              ">! You have 30 seconds to respond!");
+            Task.Delay(30000).Wait();
             if (target.Whipped)
             {
                 target.Whipped = false;
