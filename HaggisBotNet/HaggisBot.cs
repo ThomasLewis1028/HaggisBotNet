@@ -125,8 +125,8 @@ namespace HaggisBotNet
                 eb.AddField("Roulette Stats", "rrStats | rrS");
                 eb.AddField("Roulette Leaderboard", "rrLB | rrLeaderBoard | rrLead");
                 eb.AddField("Roulette Spin","rrSpin");
-                eb.AddField("Roulette Pistol Whip", "(rrPistolWhip | rrWhip | rrPW) @<user>");
-                eb.AddField("Roulette Counter Whip", "rrCounterWhip | rrCW");
+                // eb.AddField("Roulette Pistol Whip", "(rrPistolWhip | rrWhip | rrPW) @<user>");
+                // eb.AddField("Roulette Counter Whip", "rrCounterWhip | rrCW");
                 eb.AddField("Roulette Shooter Player", "(rrSP | rrShootPlayer) @<user>");
                 eb.AddField("Ping", "Pong");
 
@@ -157,14 +157,14 @@ namespace HaggisBotNet
                             _logger.Info("Spinning roulette barrel: " + content);
                             await sm.Channel.SendMessageAsync(_roulette.SpinBarrel());
                             break;
-                        case var content when _rouletteWhip.IsMatch(content):
-                            _logger.Info("Pistol Whipping Roullete: " + content);
-                            _roulette.PistolWhip(sm).RunSynchronously();
-                            break;
-                        case var content when _rouletteWhipCounter.IsMatch(content):
-                            _logger.Info("Counter Whipping Roulette: " + content);
-                            await sm.Channel.SendMessageAsync(_roulette.CounterWhip(sm));
-                            break;
+                        // case var content when _rouletteWhip.IsMatch(content):
+                        //     _logger.Info("Pistol Whipping Roullete: " + content);
+                        //     _roulette.PistolWhip(sm).RunSynchronously();
+                        //     break;
+                        // case var content when _rouletteWhipCounter.IsMatch(content):
+                        //     _logger.Info("Counter Whipping Roulette: " + content);
+                        //     await sm.Channel.SendMessageAsync(_roulette.CounterWhip(sm));
+                        //     break;
                         case var content when _rouletteShootPlayer.IsMatch(content):
                             _logger.Info("Shooting Player Roulette: " + content);
                             await sm.Channel.SendMessageAsync(_roulette.ShootPlayer(sm));
