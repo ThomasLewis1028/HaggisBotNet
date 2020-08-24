@@ -52,7 +52,8 @@ namespace HaggisBotNet
         private readonly Regex _help =
             new Regex("^!(help)", RegexOptions.IgnoreCase);
 
-        private readonly Regex _reddit = new Regex("(/r/|r/)\\S+", RegexOptions.IgnoreCase);
+        private readonly Regex _subreddit = new Regex("r/[^/ ]+", RegexOptions.IgnoreCase);
+        private readonly Regex _reddit = new Regex("(com)", RegexOptions.IgnoreCase);
 
         // Discord config files
         private DiscordSocketClient _client;
@@ -136,7 +137,7 @@ namespace HaggisBotNet
                 _logger.Info("Sending help list: " + sm.Content);
                 await sm.Channel.SendMessageAsync(null, false, eb.Build());
             }
-            else if (_reddit.IsMatch(sm.Content))
+            else if (_subreddit.IsMatch(sm.Content) && !_reddit.IsMatch(sm.Content))
             {
                 try
                 {
