@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using System.Linq;
 using System.Reflection;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
@@ -14,7 +15,7 @@ namespace HaggisBotNet
     {
         // private static Games.HaggisBotNet.Games _games;
         private static Roulette _roulette;
-        
+
         private readonly NLog.Logger _logger = NLog.LogManager.GetCurrentClassLogger();
 
         // Properties file
@@ -41,15 +42,17 @@ namespace HaggisBotNet
 
         private readonly Regex _rouletteWhip =
             new Regex("^!(rrPistolWhip|rrWhip|rrPW) <@!(\\d+)>($| .*)", RegexOptions.IgnoreCase);
-        
+
         private readonly Regex _rouletteWhipCounter =
             new Regex("^!(rrCounterWhip|rrCW)", RegexOptions.IgnoreCase);
-        
+
         private readonly Regex _rouletteShootPlayer =
             new Regex("^!(rrShootPlayer|rrSP) <@!(\\d+)>($| .*)", RegexOptions.IgnoreCase);
-        
-        private readonly Regex _help = 
+
+        private readonly Regex _help =
             new Regex("^!(help)", RegexOptions.IgnoreCase);
+
+        private readonly Regex _reddit = new Regex("(/r/|r/)\\S+", RegexOptions.IgnoreCase);
 
         // Discord config files
         private DiscordSocketClient _client;
@@ -124,7 +127,7 @@ namespace HaggisBotNet
                 eb.AddField("Play Roulette", "rr");
                 eb.AddField("Roulette Stats", "rrStats | rrS");
                 eb.AddField("Roulette Leaderboard", "rrLB | rrLeaderBoard | rrLead");
-                eb.AddField("Roulette Spin","rrSpin");
+                eb.AddField("Roulette Spin", "rrSpin");
                 // eb.AddField("Roulette Pistol Whip", "(rrPistolWhip | rrWhip | rrPW) @<user>");
                 // eb.AddField("Roulette Counter Whip", "rrCounterWhip | rrCW");
                 eb.AddField("Roulette Shoot Player", "(rrSP | rrShootPlayer) @<user>");
@@ -133,6 +136,11 @@ namespace HaggisBotNet
                 _logger.Info("Sending help list: " + sm.Content);
                 await sm.Channel.SendMessageAsync(null, false, eb.Build());
             }
+            else if (_reddit.IsMatch(sm.Content))
+                await sm.Channel.SendMessageAsync(
+                    @"https://www.reddit.com/r/" +
+                    sm.Content.Split(' ').Single(m => m.Contains(@"r/")).Split(@"r/")[1]);
+
 
             if ((long) sm.Channel.Id == _gamesChannel)
                 try
