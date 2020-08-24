@@ -137,9 +137,19 @@ namespace HaggisBotNet
                 await sm.Channel.SendMessageAsync(null, false, eb.Build());
             }
             else if (_reddit.IsMatch(sm.Content))
-                await sm.Channel.SendMessageAsync(
-                    @"https://www.reddit.com/r/" +
-                    sm.Content.Split(' ').Single(m => m.Contains(@"r/")).Split(@"r/")[1]);
+            {
+                try
+                {
+                    await sm.Channel.SendMessageAsync(
+                        @"https://www.reddit.com/r/" +
+                        sm.Content.Split(' ').Single(m => m.Contains(@"r/")).Split(@"r/")[1]);
+                }
+                catch (Exception e)
+                {
+                    _logger.Info(e);
+                }
+            }
+                
 
 
             if ((long) sm.Channel.Id == _gamesChannel)
