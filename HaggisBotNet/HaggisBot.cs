@@ -52,7 +52,7 @@ namespace HaggisBotNet
         private readonly Regex _help =
             new Regex("^!(help)", RegexOptions.IgnoreCase);
 
-        private readonly Regex _subreddit = new Regex("r/[^/ ]+", RegexOptions.IgnoreCase);
+        private readonly Regex _subreddit = new Regex("(^| |^/| /)r/[^/ ]+", RegexOptions.IgnoreCase);
         private readonly Regex _reddit = new Regex("(com)", RegexOptions.IgnoreCase);
 
         // Discord config files
