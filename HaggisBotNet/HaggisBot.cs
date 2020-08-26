@@ -33,10 +33,8 @@ namespace HaggisBotNet
 
         public HaggisBot(bool test)
         {
-            // _token =
-            //     test ? (string) Prop.GetValue("tokenTest") : (string) Prop.GetValue("token");
-
-            _token = (string) Prop.GetValue("token");
+            _token =
+                test ? (string) Prop.GetValue("tokenTest") : (string) Prop.GetValue("token");
 
             _gamesChannel = (long) Prop.GetValue("gamesChannel");
 
