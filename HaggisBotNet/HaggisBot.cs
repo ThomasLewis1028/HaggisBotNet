@@ -154,7 +154,7 @@ namespace HaggisBotNet
                 }
             }else if (_tempConv.IsMatch(sm.Content))
             {
-                sm.Channel.SendMessageAsync(TemperatureConversion.Convert(sm.Content));
+                await sm.Channel.SendMessageAsync(TemperatureConversion.Convert(sm.Content));
             }
 
             if ((long) sm.Channel.Id == _gamesChannel)
