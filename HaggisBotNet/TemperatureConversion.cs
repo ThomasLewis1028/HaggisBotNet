@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Linq;
+using System.Text.RegularExpressions;
 
 namespace HaggisBotNet
 {
@@ -7,24 +8,13 @@ namespace HaggisBotNet
     {
         public static String Convert(String message)
         {
-            var msgArr = message.Split(' ');
+            var msgArr = Regex.Split(message, "( |f|c)", RegexOptions.IgnoreCase);
+            var temp = Double.Parse(msgArr[2]);
+            var unit = msgArr[3].ToLower();
 
-            return msgArr.Last().ToLower().EndsWith('f') ? FtoC(msgArr.Last()) : CtoF(msgArr.Last());
-        }
-
-        public static String FtoC(String message)
-        {
-            var tempF = Int32.Parse(message.TrimEnd('f', 'F'));
-            var tempC = (tempF - 32) * 5 / 9;
-            return tempF + "F is " + tempC + "C";
-
-        }
-
-        public static String CtoF(String message)
-        {
-            var tempC = Int32.Parse(message.TrimEnd('c', 'C'));
-            var tempF = tempC / 5 * 9 + 32;
-            return tempC + "C is " + tempF + "F";
+            return unit == "f"
+                ? String.Format("{0}F is {1}C",  temp, Math.Round((temp - 32) * (5.0 / 9.0), 2))
+                : String.Format("{0}C is {1}F",  temp, Math.Round(temp * 1.8 + 32, 2));
         }
     }
 }
