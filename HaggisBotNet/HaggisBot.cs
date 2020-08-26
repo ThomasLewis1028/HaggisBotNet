@@ -2,7 +2,6 @@
 using System.IO;
 using System.Linq;
 using System.Reflection;
-using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Discord;
 using Discord.WebSocket;
@@ -15,6 +14,7 @@ namespace HaggisBotNet
     {
         // private static Games.HaggisBotNet.Games _games;
         private static Roulette _roulette;
+        private static RegularExpressions _regex = new RegularExpressions();
 
         private readonly NLog.Logger _logger = NLog.LogManager.GetCurrentClassLogger();
 
@@ -27,35 +27,6 @@ namespace HaggisBotNet
         private readonly string _token;
         private readonly long _gamesChannel;
         private readonly long _haggisId;
-
-        private readonly Regex _rouletteRegex =
-            new Regex("^!(rr)($| .*)", RegexOptions.IgnoreCase);
-
-        private readonly Regex _rouletteStatsRegex =
-            new Regex("^!(rrStats|rrS)($| .*)", RegexOptions.IgnoreCase);
-
-        private readonly Regex _rouletteLeadRegex =
-            new Regex("^!(rrLB|rrLeaderBoard|rrLead)($| .*)", RegexOptions.IgnoreCase);
-
-        private readonly Regex _rouletteSpin =
-            new Regex("^!(rrSpin)($| .*)", RegexOptions.IgnoreCase);
-
-        private readonly Regex _rouletteWhip =
-            new Regex("^!(rrPistolWhip|rrWhip|rrPW) <@!(\\d+)>($| .*)", RegexOptions.IgnoreCase);
-
-        private readonly Regex _rouletteWhipCounter =
-            new Regex("^!(rrCounterWhip|rrCW)", RegexOptions.IgnoreCase);
-
-        private readonly Regex _rouletteShootPlayer =
-            new Regex("^!(rrShootPlayer|rrSP) <@!(\\d+)>($| .*)", RegexOptions.IgnoreCase);
-
-        private readonly Regex _help =
-            new Regex("^!(help)", RegexOptions.IgnoreCase);
-        
-        private readonly  Regex _tempConv = new Regex("^!temp -?\\d+(c|f)$", RegexOptions.IgnoreCase);
-
-        private readonly Regex _subreddit = new Regex("(^| |^/| /)r/[^/ ]+", RegexOptions.IgnoreCase);
-        private readonly Regex _reddit = new Regex("(com)", RegexOptions.IgnoreCase);
 
         // Discord config files
         private DiscordSocketClient _client;
@@ -120,7 +91,7 @@ namespace HaggisBotNet
             else if (sm.Content.ToLower() == "pong")
                 await sm.Channel.SendMessageAsync("Ping");
 
-            if (_help.IsMatch(sm.Content))
+            if (_regex.Help.IsMatch(sm.Content))
             {
                 EmbedBuilder eb = new EmbedBuilder();
                 eb.Title = "Help";
@@ -140,7 +111,7 @@ namespace HaggisBotNet
                 _logger.Info("Sending help list: " + sm.Content);
                 await sm.Channel.SendMessageAsync(null, false, eb.Build());
             }
-            else if (_subreddit.IsMatch(sm.Content) && !_reddit.IsMatch(sm.Content))
+            else if (_regex.Subreddit.IsMatch(sm.Content) && !_regex.Reddit.IsMatch(sm.Content))
             {
                 try
                 {
@@ -152,7 +123,7 @@ namespace HaggisBotNet
                 {
                     _logger.Info(e);
                 }
-            }else if (_tempConv.IsMatch(sm.Content))
+            }else if (_regex.TempConv.IsMatch(sm.Content))
             {
                 await sm.Channel.SendMessageAsync(TemperatureConversion.Convert(sm.Content));
             }
@@ -162,33 +133,33 @@ namespace HaggisBotNet
                 {
                     switch (sm.Content)
                     {
-                        case var content when _rouletteRegex.IsMatch(content):
+                        case var content when _regex.RouletteRegex.IsMatch(content):
                             _logger.Info("Playing round of roulette: " + content);
                             await sm.Channel.SendMessageAsync(_roulette.PlayRound(sm));
                             break;
-                        case var content when _rouletteStatsRegex.IsMatch(content):
+                        case var content when _regex.RouletteStatsRegex.IsMatch(content):
                             _logger.Info("Getting roulette stats: " + content);
                             var statsReturn = _roulette.GetStats((Int64) sm.Author.Id);
                             await sm.Channel.SendMessageAsync(statsReturn.Item1, false, statsReturn.Item2);
                             break;
-                        case var content when _rouletteLeadRegex.IsMatch(content):
+                        case var content when _regex.RouletteLeadRegex.IsMatch(content):
                             _logger.Info("Getting roulette leaderboard: " + content);
                             var leadReturn = _roulette.GetLeaders((long) sm.Author.Id);
                             await sm.Channel.SendMessageAsync(leadReturn.Item1, false, leadReturn.Item2);
                             break;
-                        case var content when _rouletteSpin.IsMatch(content):
+                        case var content when _regex.RouletteSpin.IsMatch(content):
                             _logger.Info("Spinning roulette barrel: " + content);
                             await sm.Channel.SendMessageAsync(_roulette.SpinBarrel());
                             break;
-                        // case var content when _rouletteWhip.IsMatch(content):
+                        // case var content when _regex.RouletteWhip.IsMatch(content):
                         //     _logger.Info("Pistol Whipping Roullete: " + content);
                         //     _roulette.PistolWhip(sm).RunSynchronously();
                         //     break;
-                        // case var content when _rouletteWhipCounter.IsMatch(content):
+                        // case var content when _regex.RouletteWhipCounter.IsMatch(content):
                         //     _logger.Info("Counter Whipping Roulette: " + content);
                         //     await sm.Channel.SendMessageAsync(_roulette.CounterWhip(sm));
                         //     break;
-                        case var content when _rouletteShootPlayer.IsMatch(content):
+                        case var content when _regex.RouletteShootPlayer.IsMatch(content):
                             _logger.Info("Shooting Player Roulette: " + content);
                             await sm.Channel.SendMessageAsync(_roulette.ShootPlayer(sm));
                             break;
