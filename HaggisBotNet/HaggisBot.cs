@@ -51,6 +51,8 @@ namespace HaggisBotNet
 
         private readonly Regex _help =
             new Regex("^!(help)", RegexOptions.IgnoreCase);
+        
+        private readonly  Regex _tempConv = new Regex("^!temp \\d+(c|f)$", RegexOptions.IgnoreCase);
 
         private readonly Regex _subreddit = new Regex("(^| |^/| /)r/[^/ ]+", RegexOptions.IgnoreCase);
         private readonly Regex _reddit = new Regex("(com)", RegexOptions.IgnoreCase);
@@ -133,6 +135,7 @@ namespace HaggisBotNet
                 // eb.AddField("Roulette Counter Whip", "rrCounterWhip | rrCW");
                 eb.AddField("Roulette Shoot Player", "(rrSP | rrShootPlayer) @<user>");
                 eb.AddField("Ping", "Pong");
+                eb.AddField("Convert Temperatures", "temp <Temperature><Unit>");
 
                 _logger.Info("Sending help list: " + sm.Content);
                 await sm.Channel.SendMessageAsync(null, false, eb.Build());
@@ -149,9 +152,10 @@ namespace HaggisBotNet
                 {
                     _logger.Info(e);
                 }
+            }else if (_tempConv.IsMatch(sm.Content))
+            {
+                sm.Channel.SendMessageAsync(TemperatureConversion.Convert(sm.Content));
             }
-                
-
 
             if ((long) sm.Channel.Id == _gamesChannel)
                 try
