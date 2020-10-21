@@ -355,6 +355,22 @@ namespace HaggisBotNet.Games
             return ("", eb.Build());
         }
 
+        public List<Int64> AddPoints(List<Int64> playerIds)
+        {
+            var players =
+                from better in _bettingGame.Betters
+                join player in playerIds 
+                    on better.Id equals player
+                select better;
+
+            foreach (var player in players)
+            {
+                player.Points += 10;
+            }
+            
+            return  new List<long>();
+        }
+
         /// <summary>
         /// Parse a json object and set it to a C# object.
         /// </summary>
