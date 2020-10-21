@@ -129,6 +129,10 @@ namespace HaggisBotNet
                         var betListReturn = _betting.ListBets(sm);
                         await sm.Channel.SendMessageAsync(betListReturn.Item1, false, betListReturn.Item2);
                         break;
+                    case var content when _regex.ViewPlayer.IsMatch(content):
+                        var playerReturn = _betting.ViewPlayer(sm);
+                        await sm.Channel.SendMessageAsync(playerReturn.Item1, false, playerReturn.Item2);
+                        break;
                 }
             }
             catch (Exception e)

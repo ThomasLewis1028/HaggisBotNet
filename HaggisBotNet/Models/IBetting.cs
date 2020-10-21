@@ -25,6 +25,8 @@ namespace HaggisBotNet.Models
         public Boolean IsActive { get; set; }
 
         public Int32 WinningBet { get; set; }
+        
+        public Int32 BetPool { get; set; }
     }
 
     public class PlayerBet
@@ -45,5 +47,9 @@ namespace HaggisBotNet.Models
         public String Name { get; set; }
 
         public Int32 Points { get; set; }
+        
+        public Int32 BetsWon { get; set; }
+        
+        public Dictionary<Int32, String> WonBetsList { get; set; }
     }
 }

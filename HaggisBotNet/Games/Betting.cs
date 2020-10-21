@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
-using System.Threading.Tasks;
 using Discord;
 using Discord.WebSocket;
 using HaggisBotNet.Models;
@@ -59,6 +59,7 @@ namespace HaggisBotNet.Games
                 BookieId = (Int64) sm.Author.Id,
                 BookieName = sm.Author.Username,
                 IsActive = true,
+                BetPool = 0
             };
 
             _bettingGame.Bets.Add(bet);
@@ -98,11 +99,50 @@ namespace HaggisBotNet.Games
             return $"Bet `{bet.Id}`- `{bet.Name}` has been closed. \nThe winning bet was {winningBet}";
         }
 
-        public async void CalculatePoints(SocketMessage sm, List<PlayerBet> playerBets, Bet bet)
+        /// <summary>
+        /// Receive a SocketMessage, a list of PlayerBets, and a Bet.
+        ///
+        /// Calculate the amount of points that someone earned via betting, either choosing the actual winner,
+        /// or those closest to the result.
+        /// </summary>
+        /// <param name="sm"></param>
+        /// <param name="playerBets"></param>
+        /// <param name="bet"></param>
+        private async void CalculatePoints(SocketMessage sm, List<PlayerBet> playerBets, Bet bet)
         {
-            
-            
-            await sm.Channel.SendMessageAsync("Test");
+            if (playerBets == null)
+                await sm.Channel.SendMessageAsync($"No one bet on {bet.Id} - {bet.Name}");
+
+            var playersAndBets = new Dictionary<Int64, Int32>();
+
+            foreach (var playerBet in playerBets)
+                playersAndBets.Add(playerBet.BetterId, Math.Abs(bet.WinningBet - playerBet.Bet));
+
+            var sortedPlayerBets =
+                from entry
+                    in playersAndBets
+                orderby entry.Value
+                select entry;
+
+            var closestBet = sortedPlayerBets.First().Value;
+            var winners = sortedPlayerBets.Where(b => b.Value == closestBet);
+            var winnings = bet.BetPool / winners.Count();
+
+            var winningBetters =
+                from winner in winners
+                join player in _bettingGame.Betters on winner.Key equals player.Id
+                select player;
+
+            StringBuilder sb = new StringBuilder();
+            foreach (var player in winningBetters)
+            {
+                sb.Append(player.Name + "\n");
+                player.Points += winnings;
+                player.WonBetsList.Add(bet.Id, bet.Name);
+                player.BetsWon++;
+            }
+
+            SerializeData(_bettingGame);
         }
 
         /// <summary>
@@ -128,18 +168,14 @@ namespace HaggisBotNet.Games
             if (!bet.IsActive)
                 return $"Bet `{bet.Id}` - `{bet.Name}` has already been closed";
 
-            var better = _bettingGame.Betters.Find(p => p.Id == betterId);
-            if (better == null)
+            var better = _bettingGame.Betters.Find(p => p.Id == betterId) ?? new Better
             {
-                better = new Better
-                {
-                    Id = betterId,
-                    Name = betterName,
-                    Points = 0
-                };
-
-                _bettingGame.Betters.Add(better);
-            }
+                Id = betterId,
+                Name = betterName,
+                Points = 1000,
+                BetsWon = 0,
+                WonBetsList = new Dictionary<int, string>()
+            };
 
             var playerBet = _bettingGame.PlayerBets.Find(b => b.BetId == betId && b.BetterId == better.Id);
             if (playerBet == null)
@@ -151,6 +187,10 @@ namespace HaggisBotNet.Games
                     Bet = betValue,
                     Points = betPoints
                 };
+
+                better.Points -= playerBet.Points;
+                _bettingGame.Betters.Add(better);
+                bet.BetPool += playerBet.Points;
 
                 _bettingGame.PlayerBets.Add(playerBet);
                 SerializeData(_bettingGame);
@@ -179,6 +219,7 @@ namespace HaggisBotNet.Games
             eb.Title = $"{bet.Id} - {bet.Name}";
             eb.WithAuthor($"Bookie: {bet.BookieName}");
             eb.AddField("Is Active: ", bet.IsActive);
+            eb.AddField("Bet Pool: ", bet.BetPool);
             if (!bet.IsActive)
                 eb.AddField("Winning bet: ", bet.WinningBet);
 
@@ -235,6 +276,41 @@ namespace HaggisBotNet.Games
             eb.AddField("Bets", sb);
 
             return ("", eb.Build());
+        }
+
+        public (String, Embed) ViewPlayer(SocketMessage sm)
+        {
+            var stringSplit = sm.Content.Split(' ');
+            Int64 playerId;
+            if (stringSplit.Length > 1)
+                playerId = Int64.Parse(
+                    stringSplit[1].Split(new[] {"<@!", ">"}, StringSplitOptions.RemoveEmptyEntries)[1]);
+            else
+                playerId = (Int64) sm.Author.Id;
+
+            var player = _bettingGame.Betters.Find(b => b.Id == playerId);
+            
+            if (player != null)
+            {
+                EmbedBuilder eb = new EmbedBuilder();
+                eb.WithTitle(player.Name);
+                eb.WithColor(Color.Purple);
+                eb.AddField("Points: ", player.Points);
+                eb.AddField("Bets Won: ", player.BetsWon);
+
+                if (player.WonBetsList.Count > 0)
+                {
+                    StringBuilder sb = new StringBuilder();
+                    foreach (var bet in player.WonBetsList)
+                        sb.Append($"{bet.Key} - {bet.Value}\n");
+
+                    eb.AddField("List of Bets Won: ", sb);
+                }
+
+                return ("", eb.Build());
+            }
+
+            return ("No Player Found", null);
         }
 
         /// <summary>
