@@ -138,7 +138,7 @@ namespace HaggisBotNet.Games
                 player.Points += value;
                 bet.BetPool -= value;
             }
-            
+
             var winnings = bet.BetPool / winners.Count();
 
             StringBuilder sb = new StringBuilder();
@@ -190,16 +190,18 @@ namespace HaggisBotNet.Games
             {
                 if (betPoints > better.Points)
                 {
-                    return $"<@{sm.Author.Id}> Your bet of {betPoints} was not added to Bet `{bet.Id}` - `{bet.Name}`\n" + 
+                    return
+                        $"<@{sm.Author.Id}> Your bet of {betPoints} was not added to Bet `{bet.Id}` - `{bet.Name}`\n" +
                         $"You only have {better.Points}";
                 }
 
                 if (betPoints < 100)
                 {
-                    return $"<@{sm.Author.Id}> Your bet of {betPoints} was not added to Bet `{bet.Id}` - `{bet.Name}`\n" + 
-                           "Minimum bet is 100";
+                    return
+                        $"<@{sm.Author.Id}> Your bet of {betPoints} was not added to Bet `{bet.Id}` - `{bet.Name}`\n" +
+                        "Minimum bet is 100";
                 }
-                
+
                 playerBet = new PlayerBet
                 {
                     BetterId = better.Id,
@@ -207,7 +209,7 @@ namespace HaggisBotNet.Games
                     Bet = betValue,
                     Points = betPoints
                 };
-                
+
                 better.Points -= playerBet.Points;
                 _bettingGame.Betters.Add(better);
                 bet.BetPool += playerBet.Points;
@@ -298,39 +300,59 @@ namespace HaggisBotNet.Games
             return ("", eb.Build());
         }
 
+        /// <summary>
+        /// Receive a SocketMessage and parse it out to gather the information about a specified player
+        /// </summary>
+        /// <param name="sm"></param>
+        /// <returns></returns>
         public (String, Embed) ViewPlayer(SocketMessage sm)
         {
-            var stringSplit = sm.Content.Split(' ');
             Int64 playerId;
-            if (stringSplit.Length > 1)
-                playerId = Int64.Parse(
-                    stringSplit[1].Split(new[] {"<@!", ">"}, StringSplitOptions.RemoveEmptyEntries)[1]);
+            String playerName;
+            if (sm.MentionedUsers.Count == 1)
+            {
+                playerId = (Int64) sm.MentionedUsers.First().Id;
+                playerName = sm.MentionedUsers.First().Username;
+            }
             else
+            {
                 playerId = (Int64) sm.Author.Id;
+                playerName = sm.Author.Username;
+            }
 
             var player = _bettingGame.Betters.Find(b => b.Id == playerId);
 
-            if (player != null)
+            if (player == null)
             {
-                EmbedBuilder eb = new EmbedBuilder();
-                eb.WithTitle(player.Name);
-                eb.WithColor(Color.Purple);
-                eb.AddField("Points: ", player.Points);
-                eb.AddField("Bets Won: ", player.BetsWon);
-
-                if (player.WonBetsList.Count > 0)
+                player = new Better
                 {
-                    StringBuilder sb = new StringBuilder();
-                    foreach (var bet in player.WonBetsList)
-                        sb.Append($"{bet.Key} - {bet.Value}\n");
-
-                    eb.AddField("List of Bets Won: ", sb);
-                }
-
-                return ("", eb.Build());
+                    Id = playerId,
+                    Name = playerName,
+                    Points = 1000,
+                    BetsWon = 0,
+                    WonBetsList = new Dictionary<int, string>()
+                };
+                
+                _bettingGame.Betters.Add(player);
+                SerializeData(_bettingGame);
             }
 
-            return ("No Player Found", null);
+            EmbedBuilder eb = new EmbedBuilder();
+            eb.WithTitle(player.Name);
+            eb.WithColor(Color.Purple);
+            eb.AddField("Points: ", player.Points);
+            eb.AddField("Bets Won: ", player.BetsWon);
+
+            if (player.WonBetsList.Count > 0)
+            {
+                StringBuilder sb = new StringBuilder();
+                foreach (var bet in player.WonBetsList)
+                    sb.Append($"{bet.Key} - {bet.Value}\n");
+
+                eb.AddField("List of Bets Won: ", sb);
+            }
+
+            return ("", eb.Build());
         }
 
         /// <summary>

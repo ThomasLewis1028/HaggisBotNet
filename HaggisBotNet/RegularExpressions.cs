@@ -43,6 +43,6 @@ namespace HaggisBotNet
         public readonly Regex AddBet = new Regex("^!(bet|addBet|betAdd) \\d* \\d* \\d*$", RegexOptions.IgnoreCase);
         public readonly Regex ListBets = new Regex("^!(listBets|betsList|lb)(| -all)$", RegexOptions.IgnoreCase);
         public readonly Regex ViewBet = new Regex("^!(viewBet|betView|vb) \\d.*$", RegexOptions.IgnoreCase);
-        public readonly Regex ViewPlayer = new Regex("^!(viewPlayer|playerView|vp)(|<@!(\\d+)>)$", RegexOptions.IgnoreCase);
+        public readonly Regex ViewPlayer = new Regex("^!(viewPlayer|playerView|vp)(| <@!(\\d+)>)$", RegexOptions.IgnoreCase);
     }
 }
