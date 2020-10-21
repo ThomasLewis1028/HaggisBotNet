@@ -8,15 +8,19 @@ namespace HaggisBotNet.Models
         public List<Better> Betters { get; set; }
         
         public List<Bet> Bets { get; set; }
+        
+        public List<PlayerBet> PlayerBets { get; set; }
     }
 
     public class Bet
     {
-        public String BetName { get; set; }
+        public String Name { get; set; }
         
-        public Int32 BetId { get; set; }
+        public Int32 Id { get; set; }
 
-        public Int64 Bookie { get; set; }
+        public Int64 BookieId { get; set; }
+        
+        public String BookieName { get; set; }
         
         public Boolean IsActive { get; set; }
 
@@ -30,16 +34,16 @@ namespace HaggisBotNet.Models
         public Int32 BetId { get; set; }
         
         public Int32 Bet { get; set; }
+        
+        public Int32 Points { get; set; }
     }
 
     public class Better
     {
-        public Int64 BetterId { get; set; }
-
-        public Int32 Bet { get; set; }
+        public Int64 Id { get; set; }
+        
+        public String Name { get; set; }
 
         public Int32 Points { get; set; }
-        
-        public List<PlayerBet> Bets { get; set; }
     }
 }

@@ -1,9 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Net.Sockets;
-using System.Threading;
 using System.Threading.Tasks;
 using Discord;
 using Discord.WebSocket;
@@ -11,7 +8,7 @@ using HaggisBotNet.Models;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
-namespace Games.HaggisBotNet
+namespace HaggisBotNet.Games
 {
     internal class Roulette
     {
@@ -28,7 +25,7 @@ namespace Games.HaggisBotNet
             if (!File.Exists(RouletteGamePath))
             {
                 File.Create(RouletteGamePath).Close();
-                RouletteGame = new IRoulette()
+                RouletteGame = new IRoulette
                 {
                     Round = Rand.Next(0, 6),
                     Players = new List<Player>(),

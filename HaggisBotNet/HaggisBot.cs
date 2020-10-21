@@ -12,6 +12,7 @@ using Google.Apis.Sheets.v4;
 using Google.Apis.Sheets.v4.Data;
 using Google.Apis.Services;
 using Google.Apis.Util.Store;
+using HaggisBotNet.Games;
 using HaggisBotNet.Models;
 using Color = Discord.Color;
 
@@ -115,10 +116,18 @@ namespace HaggisBotNet
                         await sm.Channel.SendMessageAsync(_betting.CreateBet(sm));
                         break;
                     case var content when _regex.EndBet.IsMatch(content):
+                        await sm.Channel.SendMessageAsync(_betting.EndBet(sm));
+                        break;
+                    case var content when _regex.AddBet.IsMatch(content):
+                        await sm.Channel.SendMessageAsync(_betting.AddBet(sm));
                         break;
                     case var content when _regex.ViewBet.IsMatch(content):
+                        var betReturn = _betting.ViewBet(sm);
+                        await sm.Channel.SendMessageAsync(betReturn.Item1, false, betReturn.Item2);
                         break;
                     case var content when _regex.ListBets.IsMatch(content):
+                        var betListReturn = _betting.ListBets(sm);
+                        await sm.Channel.SendMessageAsync(betListReturn.Item1, false, betListReturn.Item2);
                         break;
                 }
             }
