@@ -50,7 +50,7 @@ namespace HaggisBotNet
             _haggisId = (long) Prop.GetValue("Admin")[0].First.First;
 
             _roulette = new Roulette(GamePath);
-            
+
             _betting = new Betting(GamePath);
 
             // _dmChannel =
@@ -190,18 +190,31 @@ namespace HaggisBotNet
         {
             EmbedBuilder eb = new EmbedBuilder();
             eb.Title = "Help";
-            eb.Description = "All commands are case insensitive and are preceded with !";
+            eb.Description = "All commands are case insensitive and are preceded with !\n" +
+                             "<> indicates required parameter \n" +
+                             "[] indicates optional parameter \n" +
+                             "() indicates either or parameter";
             eb.Color = Color.Gold;
             eb.AddField("Help", "help");
-            eb.AddField("Play Roulette", "rr");
-            eb.AddField("Roulette Stats", "rrStats | rrS");
-            eb.AddField("Roulette Leaderboard", "rrLB | rrLeaderBoard | rrLead");
-            eb.AddField("Roulette Spin", "rrSpin");
-            // eb.AddField("Roulette Pistol Whip", "(rrPistolWhip | rrWhip | rrPW) @<user>");
-            // eb.AddField("Roulette Counter Whip", "rrCounterWhip | rrCW");
-            eb.AddField("Roulette Shoot Player", "(rrSP | rrShootPlayer) @<user>");
             eb.AddField("Ping", "Pong");
             eb.AddField("Convert Temperatures", "temp <Temperature><Unit>");
+
+            eb.AddField("Betting",
+                "Create Bet - (createBet | betCreate | cb) <bet title>\n" +
+                "End Bet - (endBet | betEnd | eb) <bet Id> <winning value>\n" +
+                "Bet - (bet | addBet | betAdd) <bet Id> <bet value> <bet points>\n" +
+                "List Bets - (listBets | betsList | lb) [-all]\n" +
+                "View Bet - (viewBet | betView | vb) <bet Id>\n" +
+                "View Player - (viewPlayer | playerView | vp) [@<user>]");
+
+            eb.AddField("Roulette",
+                "Play Roulette - rr\n" +
+                "Roulette Stats - (rrStats | rrS)\n" +
+                "Roulette Leaderboard - (rrLB | rrLeaderBoard | rrLead)\n" +
+                "Roulette Spin - rrSpin\n" +
+                // "Roulette Pistol Whip - (rrPistolWhip | rrWhip | rrPW) @<user>\n" +
+                // "Roulette Counter Whip - rrCounterWhip | rrCW\n" +
+                "Roulette Shoot Player - (rrSP | rrShootPlayer) <@<user>>");
 
             _logger.Info("Sending help list: " + sm.Content);
             await sm.Channel.SendMessageAsync(null, false, eb.Build());
