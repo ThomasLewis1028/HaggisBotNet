@@ -126,12 +126,20 @@ namespace HaggisBotNet.Games
 
             var closestBet = sortedPlayerBets.First().Value;
             var winners = sortedPlayerBets.Where(b => b.Value == closestBet);
-            var winnings = bet.BetPool / winners.Count();
 
             var winningBetters =
                 from winner in winners
                 join player in _bettingGame.Betters on winner.Key equals player.Id
                 select player;
+
+            foreach (var player in winningBetters)
+            {
+                var value = playersAndBets.First(p => p.Key == player.Id).Value;
+                player.Points += value;
+                bet.BetPool -= value;
+            }
+            
+            var winnings = bet.BetPool / winners.Count();
 
             StringBuilder sb = new StringBuilder();
             foreach (var player in winningBetters)
@@ -180,6 +188,18 @@ namespace HaggisBotNet.Games
             var playerBet = _bettingGame.PlayerBets.Find(b => b.BetId == betId && b.BetterId == better.Id);
             if (playerBet == null)
             {
+                if (betPoints > better.Points)
+                {
+                    return $"<@{sm.Author.Id}> Your bet of {betPoints} was not added to Bet `{bet.Id}` - `{bet.Name}`\n" + 
+                        $"You only have {better.Points}";
+                }
+
+                if (betPoints < 100)
+                {
+                    return $"<@{sm.Author.Id}> Your bet of {betPoints} was not added to Bet `{bet.Id}` - `{bet.Name}`\n" + 
+                           "Minimum bet is 100";
+                }
+                
                 playerBet = new PlayerBet
                 {
                     BetterId = better.Id,
@@ -187,7 +207,7 @@ namespace HaggisBotNet.Games
                     Bet = betValue,
                     Points = betPoints
                 };
-
+                
                 better.Points -= playerBet.Points;
                 _bettingGame.Betters.Add(better);
                 bet.BetPool += playerBet.Points;
@@ -289,7 +309,7 @@ namespace HaggisBotNet.Games
                 playerId = (Int64) sm.Author.Id;
 
             var player = _bettingGame.Betters.Find(b => b.Id == playerId);
-            
+
             if (player != null)
             {
                 EmbedBuilder eb = new EmbedBuilder();
@@ -320,12 +340,12 @@ namespace HaggisBotNet.Games
         private IBetting LoadBetting()
         {
             // Parse the file into a JObject
-            var roulette =
+            var betting =
                 JObject.Parse(
                     File.ReadAllText(_bettingGamePath));
 
             // Deserialize the JObject into a Universe and return it
-            return JsonConvert.DeserializeObject<IBetting>(roulette.ToString());
+            return JsonConvert.DeserializeObject<IBetting>(betting.ToString());
         }
 
         /// <summary>
