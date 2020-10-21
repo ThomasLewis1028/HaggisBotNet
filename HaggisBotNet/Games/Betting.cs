@@ -50,7 +50,13 @@ namespace HaggisBotNet.Games
         /// <returns></returns>
         public string CreateBet(SocketMessage sm)
         {
+            var splitString = sm.Content.Split(' ');
             var betTitle = Regex.Split(sm.Content, "^!(createBet|betCreate|cb) ", RegexOptions.IgnoreCase)[2];
+            var betDate = Regex.IsMatch(splitString.Last(), "\\d{2}/\\d{2}/\\d{4}")
+                ? DateTime.Parse(splitString.Last())
+                : DateTime.Today.AddDays(7).Date;
+
+            betTitle = Regex.Replace(betTitle, "\\d{2}/\\d{2}/\\d{4}", "").Trim();
 
             Bet bet = new Bet
             {
@@ -59,7 +65,9 @@ namespace HaggisBotNet.Games
                 BookieId = (Int64) sm.Author.Id,
                 BookieName = sm.Author.Username,
                 IsActive = true,
-                BetPool = 0
+                BetPool = 0,
+                StartDate = DateTime.Today.Date,
+                CloseDate = betDate
             };
 
             _bettingGame.Bets.Add(bet);
@@ -174,7 +182,10 @@ namespace HaggisBotNet.Games
                 return $"Bet `{betId}` does not exist";
 
             if (!bet.IsActive)
-                return $"Bet `{bet.Id}` - `{bet.Name}` has already been closed";
+                return $"Bet `{bet.Id}` - `{bet.Name}` is no longer active";
+
+            if (bet.CloseDate < DateTime.Today)
+                return $"Bet `{bet.Id}` - `{bet.Name}` is closed for betting";
 
             var better = _bettingGame.Betters.Find(p => p.Id == betterId) ?? new Better
             {
@@ -242,6 +253,9 @@ namespace HaggisBotNet.Games
             eb.WithAuthor($"Bookie: {bet.BookieName}");
             eb.AddField("Is Active: ", bet.IsActive);
             eb.AddField("Bet Pool: ", bet.BetPool);
+            eb.AddField("Start Date: ", bet.StartDate);
+            eb.AddField("Close Date: ", bet.CloseDate);
+
             if (!bet.IsActive)
                 eb.AddField("Winning bet: ", bet.WinningBet);
 
@@ -332,7 +346,7 @@ namespace HaggisBotNet.Games
                     BetsWon = 0,
                     WonBetsList = new Dictionary<int, string>()
                 };
-                
+
                 _bettingGame.Betters.Add(player);
                 SerializeData(_bettingGame);
             }
@@ -356,6 +370,29 @@ namespace HaggisBotNet.Games
         }
 
         /// <summary>
+        /// Receive a socket message and edit a bet.
+        ///
+        /// Currently only allows you to edit the date
+        /// </summary>
+        /// <param name="sm"></param>
+        /// <returns></returns>
+        public String EditBet(SocketMessage sm)
+        {
+            var splitString = sm.Content.Split(' ');
+            var betId = Int32.Parse(splitString[1]);
+            var date = DateTime.Parse(splitString[3]);
+
+            var bet = _bettingGame.Bets.Find(b => b.Id == betId);
+
+            if (bet == null)
+                return $"Bet `{betId}` does not exist";
+
+            bet.CloseDate = date;
+            SerializeData(_bettingGame);
+            return $"Bet `{bet.Id}` - `{bet.Name}` has been updated\n";
+        }
+
+        /// <summary>
         /// Receive a list of users that need updating and add 10 points to them if they're in the list.
         /// </summary>
         /// <param name="playerIds"></param>
@@ -364,7 +401,7 @@ namespace HaggisBotNet.Games
         {
             var players =
                 from better in _bettingGame.Betters
-                join player in playerIds 
+                join player in playerIds
                     on better.Id equals player
                 select better;
 
@@ -372,9 +409,9 @@ namespace HaggisBotNet.Games
             {
                 player.Points += 10;
             }
-            
+
             SerializeData(_bettingGame);
-            return  new List<long>();
+            return new List<long>();
         }
 
         /// <summary>

@@ -38,11 +38,12 @@ namespace HaggisBotNet
         public readonly Regex Reddit = new Regex("(com)", RegexOptions.IgnoreCase);
 
         // Bet-related regex
-        public readonly Regex CreateBet = new Regex("^!(createBet|betCreate|cb) (.*)$", RegexOptions.IgnoreCase);
+        public readonly Regex CreateBet = new Regex("^!(createBet|betCreate|cb) (.*)(| \\d{2}/\\d{2}/\\d{4})$", RegexOptions.IgnoreCase);
         public readonly Regex EndBet = new Regex("^!(endBet|betEnd|eb) \\d* \\d*$", RegexOptions.IgnoreCase);
         public readonly Regex AddBet = new Regex("^!(bet|addBet|betAdd) \\d* \\d* \\d*$", RegexOptions.IgnoreCase);
         public readonly Regex ListBets = new Regex("^!(listBets|betsList|lb)(| -all)$", RegexOptions.IgnoreCase);
         public readonly Regex ViewBet = new Regex("^!(viewBet|betView|vb) \\d.*$", RegexOptions.IgnoreCase);
         public readonly Regex ViewPlayer = new Regex("^!(viewPlayer|playerView|vp)(| <@!(\\d+)>)$", RegexOptions.IgnoreCase);
+        public readonly Regex EditBet = new Regex("^!(editBet|betEdit) \\d* (-d \\d{2}/\\d{2}/\\d{4}){1}");
     }
 }

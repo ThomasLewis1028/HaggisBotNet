@@ -133,6 +133,9 @@ namespace HaggisBotNet
                         var playerReturn = _betting.ViewPlayer(sm);
                         await sm.Channel.SendMessageAsync(playerReturn.Item1, false, playerReturn.Item2);
                         break;
+                    case var content when _regex.EditBet.IsMatch(content):
+                        await sm.Channel.SendMessageAsync(_betting.EditBet(sm));
+                        break;
                 }
             }
             catch (Exception e)

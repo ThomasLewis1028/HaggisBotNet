@@ -27,6 +27,10 @@ namespace HaggisBotNet.Models
         public Int32 WinningBet { get; set; }
         
         public Int32 BetPool { get; set; }
+        
+        public DateTime StartDate { get; set; }
+        
+        public DateTime CloseDate { get; set; }
     }
 
     public class PlayerBet
