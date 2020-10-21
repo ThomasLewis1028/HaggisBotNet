@@ -4,6 +4,7 @@ namespace HaggisBotNet
 {
     public class RegularExpressions
     {
+        // Roulette-related regex
         public readonly Regex RouletteRegex =
             new Regex("^!(rr)($| .*)", RegexOptions.IgnoreCase);
 
@@ -24,13 +25,22 @@ namespace HaggisBotNet
 
         public readonly Regex RouletteShootPlayer =
             new Regex("^!(rrShootPlayer|rrSP) <@!(\\d+)>($| .*)", RegexOptions.IgnoreCase);
-
+        
+        // Help regex
         public readonly Regex Help =
             new Regex("^!(help)", RegexOptions.IgnoreCase);
 
+        // Conversion regex
         public readonly Regex TempConv = new Regex("^!temp -?\\d+(.\\d+|)(c|f)$", RegexOptions.IgnoreCase);
 
+        // Subreddit regex
         public readonly Regex Subreddit = new Regex("(^| |^/| /)r/[^/ ]+", RegexOptions.IgnoreCase);
         public readonly Regex Reddit = new Regex("(com)", RegexOptions.IgnoreCase);
+
+        // Bet-related regex
+        public readonly Regex CreateBet = new Regex("^!(createBet|betCreate|cb) (.*)$", RegexOptions.IgnoreCase);
+        public readonly Regex EndBet = new Regex("!(endBet|betEnd|eb) \\d* \\d*$", RegexOptions.IgnoreCase);
+        public readonly Regex ListBets = new Regex("!(listBets|betsList|lb)$", RegexOptions.IgnoreCase);
+        public readonly Regex ViewBet = new Regex("!(viewBet|betView|vb) \\d.*$", RegexOptions.IgnoreCase);
     }
 }

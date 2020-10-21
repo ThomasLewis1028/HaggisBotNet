@@ -7,6 +7,13 @@ using Discord;
 using Discord.WebSocket;
 using Games.HaggisBotNet;
 using Newtonsoft.Json.Linq;
+using Google.Apis.Auth.OAuth2;
+using Google.Apis.Sheets.v4;
+using Google.Apis.Sheets.v4.Data;
+using Google.Apis.Services;
+using Google.Apis.Util.Store;
+using HaggisBotNet.Models;
+using Color = Discord.Color;
 
 namespace HaggisBotNet
 {
@@ -14,6 +21,7 @@ namespace HaggisBotNet
     {
         // private static Games.HaggisBotNet.Games _games;
         private static Roulette _roulette;
+        private static Betting _betting;
         private static RegularExpressions _regex = new RegularExpressions();
 
         private readonly NLog.Logger _logger = NLog.LogManager.GetCurrentClassLogger();
@@ -41,6 +49,8 @@ namespace HaggisBotNet
             _haggisId = (long) Prop.GetValue("Admin")[0].First.First;
 
             _roulette = new Roulette(GamePath);
+            
+            _betting = new Betting(GamePath);
 
             // _dmChannel =
             //     test ? (long) Prop.GetValue("Test DM") : (long) Prop.GetValue("DM Channel");
@@ -81,50 +91,43 @@ namespace HaggisBotNet
             if (sm.Author.IsBot)
                 return;
 
-            // if ((long) sm.Author.Id == _haggisId)
-            //     Console.Out.WriteLine(sm.Content);
-
             if (sm.Content.ToLower() == "ping")
                 await sm.Channel.SendMessageAsync("Pong");
             else if (sm.Content.ToLower() == "pong")
                 await sm.Channel.SendMessageAsync("Ping");
 
-            if (_regex.Help.IsMatch(sm.Content))
+            try
             {
-                EmbedBuilder eb = new EmbedBuilder();
-                eb.Title = "Help";
-                eb.Description = "All commands are case insensitive and are preceded with !";
-                eb.Color = Color.Gold;
-                eb.AddField("Help", "help");
-                eb.AddField("Play Roulette", "rr");
-                eb.AddField("Roulette Stats", "rrStats | rrS");
-                eb.AddField("Roulette Leaderboard", "rrLB | rrLeaderBoard | rrLead");
-                eb.AddField("Roulette Spin", "rrSpin");
-                // eb.AddField("Roulette Pistol Whip", "(rrPistolWhip | rrWhip | rrPW) @<user>");
-                // eb.AddField("Roulette Counter Whip", "rrCounterWhip | rrCW");
-                eb.AddField("Roulette Shoot Player", "(rrSP | rrShootPlayer) @<user>");
-                eb.AddField("Ping", "Pong");
-                eb.AddField("Convert Temperatures", "temp <Temperature><Unit>");
+                switch (sm.Content)
+                {
+                    case var content when _regex.Subreddit.IsMatch(content) && !_regex.Reddit.IsMatch(content):
+                        await sm.Channel.SendMessageAsync(
+                            @"https://www.reddit.com/r/" +
+                            content.Split(' ').Single(m => m.Contains(@"r/")).Split(@"r/")[1]);
+                        break;
+                    case var content when _regex.TempConv.IsMatch(content):
+                        await sm.Channel.SendMessageAsync(TemperatureConversion.Convert(content));
+                        break;
+                    case var content when _regex.Help.IsMatch(content):
+                        await SendHelp(sm);
+                        break;
+                    case var content when _regex.CreateBet.IsMatch(content):
+                        await sm.Channel.SendMessageAsync(_betting.CreateBet(sm));
+                        break;
+                    case var content when _regex.EndBet.IsMatch(content):
+                        break;
+                    case var content when _regex.ViewBet.IsMatch(content):
+                        break;
+                    case var content when _regex.ListBets.IsMatch(content):
+                        break;
+                }
+            }
+            catch (Exception e)
+            {
+                _logger.Error(e);
+                await sm.Channel.SendMessageAsync(e.Message);
+            }
 
-                _logger.Info("Sending help list: " + sm.Content);
-                await sm.Channel.SendMessageAsync(null, false, eb.Build());
-            }
-            else if (_regex.Subreddit.IsMatch(sm.Content) && !_regex.Reddit.IsMatch(sm.Content))
-            {
-                try
-                {
-                    await sm.Channel.SendMessageAsync(
-                        @"https://www.reddit.com/r/" +
-                        sm.Content.Split(' ').Single(m => m.Contains(@"r/")).Split(@"r/")[1]);
-                }
-                catch (Exception e)
-                {
-                    _logger.Info(e);
-                }
-            }else if (_regex.TempConv.IsMatch(sm.Content))
-            {
-                await sm.Channel.SendMessageAsync(TemperatureConversion.Convert(sm.Content));
-            }
 
             if ((long) sm.Channel.Id == _gamesChannel)
                 try
@@ -168,6 +171,27 @@ namespace HaggisBotNet
                     _logger.Error(e);
                     await sm.Channel.SendMessageAsync(e.Message);
                 }
+        }
+
+        private async Task SendHelp(SocketMessage sm)
+        {
+            EmbedBuilder eb = new EmbedBuilder();
+            eb.Title = "Help";
+            eb.Description = "All commands are case insensitive and are preceded with !";
+            eb.Color = Color.Gold;
+            eb.AddField("Help", "help");
+            eb.AddField("Play Roulette", "rr");
+            eb.AddField("Roulette Stats", "rrStats | rrS");
+            eb.AddField("Roulette Leaderboard", "rrLB | rrLeaderBoard | rrLead");
+            eb.AddField("Roulette Spin", "rrSpin");
+            // eb.AddField("Roulette Pistol Whip", "(rrPistolWhip | rrWhip | rrPW) @<user>");
+            // eb.AddField("Roulette Counter Whip", "rrCounterWhip | rrCW");
+            eb.AddField("Roulette Shoot Player", "(rrSP | rrShootPlayer) @<user>");
+            eb.AddField("Ping", "Pong");
+            eb.AddField("Convert Temperatures", "temp <Temperature><Unit>");
+
+            _logger.Info("Sending help list: " + sm.Content);
+            await sm.Channel.SendMessageAsync(null, false, eb.Build());
         }
     }
 }

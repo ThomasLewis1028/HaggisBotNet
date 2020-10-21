@@ -4,7 +4,6 @@ namespace HaggisBotNet
 {
     public class Program
     {
-        
         private static readonly NLog.Logger Logger = NLog.LogManager.GetCurrentClassLogger();
         private static void Main(string[] args)
         {
