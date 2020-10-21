@@ -5,15 +5,8 @@ using System.Reflection;
 using System.Threading.Tasks;
 using Discord;
 using Discord.WebSocket;
-using Games.HaggisBotNet;
 using Newtonsoft.Json.Linq;
-using Google.Apis.Auth.OAuth2;
-using Google.Apis.Sheets.v4;
-using Google.Apis.Sheets.v4.Data;
-using Google.Apis.Services;
-using Google.Apis.Util.Store;
 using HaggisBotNet.Games;
-using HaggisBotNet.Models;
 using Color = Discord.Color;
 
 namespace HaggisBotNet
