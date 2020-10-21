@@ -30,7 +30,7 @@ namespace HaggisBotNet
         private readonly string _token;
         private readonly long _gamesChannel;
         private readonly long _haggisId;
-        
+
         private List<Int64> usersChatting = new List<long>();
 
         // Discord config files
@@ -96,7 +96,7 @@ namespace HaggisBotNet
                 await sm.Channel.SendMessageAsync("Pong");
             else if (sm.Content.ToLower() == "pong")
                 await sm.Channel.SendMessageAsync("Ping");
-            
+
             try
             {
                 switch (sm.Content)
@@ -184,8 +184,8 @@ namespace HaggisBotNet
                     _logger.Error(e);
                     await sm.Channel.SendMessageAsync(e.Message);
                 }
-            
-            usersChatting.Add((Int64) sm.Author.Id);
+
+            if (!usersChatting.Contains((Int64) sm.Author.Id)) usersChatting.Add((Int64) sm.Author.Id);
         }
 
         private async Task SendHelp(SocketMessage sm)

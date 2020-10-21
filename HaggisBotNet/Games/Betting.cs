@@ -355,6 +355,11 @@ namespace HaggisBotNet.Games
             return ("", eb.Build());
         }
 
+        /// <summary>
+        /// Receive a list of users that need updating and add 10 points to them if they're in the list.
+        /// </summary>
+        /// <param name="playerIds"></param>
+        /// <returns></returns>
         public List<Int64> AddPoints(List<Int64> playerIds)
         {
             var players =
@@ -368,6 +373,7 @@ namespace HaggisBotNet.Games
                 player.Points += 10;
             }
             
+            SerializeData(_bettingGame);
             return  new List<long>();
         }
 
