@@ -253,8 +253,8 @@ namespace HaggisBotNet.Games
             eb.WithAuthor($"Bookie: {bet.BookieName}");
             eb.AddField("Is Active: ", bet.IsActive);
             eb.AddField("Bet Pool: ", bet.BetPool);
-            eb.AddField("Start Date: ", bet.StartDate);
-            eb.AddField("Close Date: ", bet.CloseDate);
+            eb.AddField("Start Date: ", bet.StartDate.ToString("D"));
+            eb.AddField("Close Date: ", bet.CloseDate.ToString("D"));
 
             if (!bet.IsActive)
                 eb.AddField("Winning bet: ", bet.WinningBet);
