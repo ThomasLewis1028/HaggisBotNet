@@ -268,7 +268,7 @@ namespace HaggisBotNet.Games
                     var better = _bettingGame.Betters.Find(p => p.Id == playerBet.BetterId);
                     if (better != null)
                         sb.Append(
-                            $"{better.Name,-20} {"-",0} {"Bet: " + playerBet.Bet,15} {"Points: " + playerBet.Points,15}\n");
+                            $"{better.Name} - {"Bet: " + playerBet.Bet} - {"Points: " + playerBet.Points}\n");
                 }
 
                 eb.AddField("Bets", sb);
