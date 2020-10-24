@@ -260,7 +260,8 @@ namespace HaggisBotNet.Games
                 eb.AddField("Winning bet: ", bet.WinningBet);
 
             StringBuilder sb = new StringBuilder();
-            var playerBets = _bettingGame.PlayerBets.FindAll(b => b.BetId == bet.Id);
+            var playerBets = _bettingGame.PlayerBets.FindAll(b => b.BetId == bet.Id)
+                .OrderBy(b => b.Bet).ToList();
             if (playerBets.Count > 0)
             {
                 foreach (var playerBet in playerBets)
