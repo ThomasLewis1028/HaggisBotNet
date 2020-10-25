@@ -140,20 +140,22 @@ namespace HaggisBotNet.Games
                 join player in _bettingGame.Betters on winner.Key equals player.Id
                 select player;
 
+            var winningPool = 0;
+
             foreach (var player in winningBetters)
             {
                 var value = playersAndBets.First(p => p.Key == player.Id).Value;
                 player.Points += value;
                 bet.BetPool -= value;
+                winningPool += value;
             }
-
-            var winnings = bet.BetPool / winners.Count();
 
             StringBuilder sb = new StringBuilder();
             foreach (var player in winningBetters)
             {
+                var value = playersAndBets.First(p => p.Key == player.Id).Value;
                 sb.Append(player.Name + "\n");
-                player.Points += winnings;
+                player.Points += value / winningPool * bet.BetPool;
                 player.WonBetsList.Add(bet.Id, bet.Name);
                 player.BetsWon++;
             }
