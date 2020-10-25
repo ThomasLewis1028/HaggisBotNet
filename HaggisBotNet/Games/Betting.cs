@@ -124,15 +124,16 @@ namespace HaggisBotNet.Games
                 return;
             }
 
-            var playersAndBets = new Dictionary<Int64, Int32>();
+            var playersAndBetsDiff = new Dictionary<Int64, Int32>();
 
+            // Get the difference between a player's bet and the winning value
             foreach (var playerBet in playerBets)
-                playersAndBets.Add(playerBet.BetterId, Math.Abs(bet.WinningBet - playerBet.Bet));
+                playersAndBetsDiff.Add(playerBet.BetterId, Math.Abs(bet.WinningBet - playerBet.Bet));
 
             // Sorted list of PlayerBets by bet value difference
             var sortedPlayerBets =
                 (from entry
-                        in playersAndBets
+                        in playersAndBetsDiff
                     orderby entry.Value
                     select entry).ToList();
 
@@ -151,7 +152,7 @@ namespace HaggisBotNet.Games
             // Give the winning betters their bets back and add to the winningPool
             foreach (var player in winningBetters)
             {
-                var value = playersAndBets.First(p => p.Key == player.Id).Value;
+                var value = playerBets.First(p => p.BetterId == player.Id).Points;
                 player.Points += value;
                 bet.BetPool -= value;
                 winningPool += value;
@@ -161,7 +162,7 @@ namespace HaggisBotNet.Games
             StringBuilder sb = new StringBuilder();
             foreach (var player in winningBetters)
             {
-                var value = playersAndBets.First(p => p.Key == player.Id).Value;
+                var value = playerBets.First(p => p.BetterId == player.Id).Points;
                 sb.Append(player.Name + "\n");
                 player.Points += value / winningPool * bet.BetPool;
                 player.WonBetsList.Add(bet.Id, bet.Name);
