@@ -131,15 +131,15 @@ namespace HaggisBotNet.Games
                 playersAndBetsDiff.Add(playerBet.BetterId, Math.Abs(bet.WinningBet - playerBet.Bet));
 
             // Sorted list of PlayerBets by bet value difference
-            var sortedPlayerBets =
+            var sortedPlayerBetsDiff =
                 (from entry
                         in playersAndBetsDiff
                     orderby entry.Value
                     select entry).ToList();
 
             // Find the closest value to the bet and select winners based on that
-            var closestBet = sortedPlayerBets.First().Value;
-            var winners = sortedPlayerBets.Where(b => b.Value == closestBet);
+            var closestBet = sortedPlayerBetsDiff.First().Value;
+            var winners = sortedPlayerBetsDiff.Where(b => b.Value == closestBet);
 
             // List of al winning betters
             var winningBetters =
@@ -148,13 +148,14 @@ namespace HaggisBotNet.Games
                     select player).ToList();
 
             var winningPool = 0;
+            var betPool = bet.BetPool;
 
             // Give the winning betters their bets back and add to the winningPool
             foreach (var player in winningBetters)
             {
                 var value = playerBets.First(p => p.BetterId == player.Id).Points;
                 player.Points += value;
-                bet.BetPool -= value;
+                betPool -= value;
                 winningPool += value;
             }
 
@@ -164,7 +165,7 @@ namespace HaggisBotNet.Games
             {
                 var value = playerBets.First(p => p.BetterId == player.Id).Points;
                 sb.Append(player.Name + "\n");
-                player.Points += value / winningPool * bet.BetPool;
+                player.Points += value / winningPool * betPool;
                 player.WonBetsList.Add(bet.Id, bet.Name);
                 player.BetsWon++;
             }
