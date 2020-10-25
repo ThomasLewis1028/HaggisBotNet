@@ -119,29 +119,36 @@ namespace HaggisBotNet.Games
         private async void CalculatePoints(SocketMessage sm, List<PlayerBet> playerBets, Bet bet)
         {
             if (playerBets == null)
+            {
                 await sm.Channel.SendMessageAsync($"No one bet on {bet.Id} - {bet.Name}");
+                return;
+            }
 
             var playersAndBets = new Dictionary<Int64, Int32>();
 
             foreach (var playerBet in playerBets)
                 playersAndBets.Add(playerBet.BetterId, Math.Abs(bet.WinningBet - playerBet.Bet));
 
+            // Sorted list of PlayerBets by bet value difference
             var sortedPlayerBets =
-                from entry
-                    in playersAndBets
-                orderby entry.Value
-                select entry;
+                (from entry
+                        in playersAndBets
+                    orderby entry.Value
+                    select entry).ToList();
 
+            // Find the closest value to the bet and select winners based on that
             var closestBet = sortedPlayerBets.First().Value;
             var winners = sortedPlayerBets.Where(b => b.Value == closestBet);
 
+            // List of al winning betters
             var winningBetters =
-                from winner in winners
-                join player in _bettingGame.Betters on winner.Key equals player.Id
-                select player;
+                (from winner in winners
+                    join player in _bettingGame.Betters on winner.Key equals player.Id
+                    select player).ToList();
 
             var winningPool = 0;
 
+            // Give the winning betters their bets back and add to the winningPool
             foreach (var player in winningBetters)
             {
                 var value = playersAndBets.First(p => p.Key == player.Id).Value;
@@ -150,6 +157,7 @@ namespace HaggisBotNet.Games
                 winningPool += value;
             }
 
+            // Build the string of the winners and give them a percentage of the pool based on their bet
             StringBuilder sb = new StringBuilder();
             foreach (var player in winningBetters)
             {
