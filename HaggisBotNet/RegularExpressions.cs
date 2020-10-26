@@ -18,13 +18,13 @@ namespace HaggisBotNet
             new Regex("^!(rrSpin)($| .*)", RegexOptions.IgnoreCase);
 
         public readonly Regex RouletteWhip =
-            new Regex("^!(rrPistolWhip|rrWhip|rrPW) <@!(\\d+)>($| .*)", RegexOptions.IgnoreCase);
+            new Regex("^!(rrPistolWhip|rrWhip|rrPW) <@(!|)(\\d+)>($| .*)", RegexOptions.IgnoreCase);
 
         public readonly Regex RouletteWhipCounter =
             new Regex("^!(rrCounterWhip|rrCW)", RegexOptions.IgnoreCase);
 
         public readonly Regex RouletteShootPlayer =
-            new Regex("^!(rrShootPlayer|rrSP) <@!(\\d+)>($| .*)", RegexOptions.IgnoreCase);
+            new Regex("^!(rrShootPlayer|rrSP) <@(!|)(\\d+)>($| .*)", RegexOptions.IgnoreCase);
         
         // Help regex
         public readonly Regex Help =
@@ -43,7 +43,7 @@ namespace HaggisBotNet
         public readonly Regex AddBet = new Regex("^!(bet|addBet|betAdd) \\d* \\d* \\d*$", RegexOptions.IgnoreCase);
         public readonly Regex ListBets = new Regex("^!(listBets|betsList|lb)(| -all)$", RegexOptions.IgnoreCase);
         public readonly Regex ViewBet = new Regex("^!(viewBet|betView|vb) \\d.*$", RegexOptions.IgnoreCase);
-        public readonly Regex ViewPlayer = new Regex("^!(viewPlayer|playerView|vp)(| <@!(\\d+)>)$", RegexOptions.IgnoreCase);
+        public readonly Regex ViewPlayer = new Regex("^!(viewPlayer|playerView|vp)(| <@(!|)(\\d+)>)$", RegexOptions.IgnoreCase);
         public readonly Regex EditBet = new Regex("^!(editBet|betEdit) \\d* (-d \\d{2}/\\d{2}/\\d{4}){1}");
     }
 }
