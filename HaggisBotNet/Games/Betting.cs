@@ -420,7 +420,7 @@ namespace HaggisBotNet.Games
 
             foreach (var player in players)
             {
-                player.Points += 10;
+                player.Points += 5;
             }
 
             SerializeData(_bettingGame);
