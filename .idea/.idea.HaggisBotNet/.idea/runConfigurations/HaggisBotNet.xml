@@ -13,6 +13,7 @@
     <option name="PROJECT_WORKING_DIRECTORY_TRACKING" value="1" />
     <option name="PROJECT_KIND" value="DotNetCore" />
     <option name="PROJECT_TFM" value=".NETCoreApp,Version=v3.1" />
+    <browser name="b2a9dca7-9d0b-4e1e-98a8-afb19c1328d2" />
     <method v="2">
       <option name="Build" />
     </method>
