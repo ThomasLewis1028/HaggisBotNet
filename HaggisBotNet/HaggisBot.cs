@@ -107,34 +107,37 @@ namespace HaggisBotNet
                             content.Split(' ').Single(m => m.Contains(@"r/")).Split(@"r/")[1]);
                         break;
                     case var content when _regex.TempConv.IsMatch(content):
-                        await sm.Channel.SendMessageAsync(TemperatureConversion.Convert(content));
+                        await ((IUserMessage) sm).ReplyAsync(TemperatureConversion.Convert(content));
                         break;
                     case var content when _regex.Help.IsMatch(content):
                         await SendHelp(sm);
                         break;
                     case var content when _regex.CreateBet.IsMatch(content):
-                        await sm.Channel.SendMessageAsync(_betting.CreateBet(sm));
+                        await ((IUserMessage) sm).ReplyAsync(_betting.CreateBet(sm));
                         break;
                     case var content when _regex.EndBet.IsMatch(content):
-                        await sm.Channel.SendMessageAsync(_betting.EndBet(sm));
+                        await ((IUserMessage) sm).ReplyAsync(_betting.EndBet(sm));
                         break;
                     case var content when _regex.AddBet.IsMatch(content):
-                        await sm.Channel.SendMessageAsync(_betting.AddBet(sm));
+                        await ((IUserMessage) sm).ReplyAsync(_betting.AddBet(sm));
                         break;
                     case var content when _regex.ViewBet.IsMatch(content):
                         var betReturn = _betting.ViewBet(sm);
-                        await sm.Channel.SendMessageAsync(betReturn.Item1, false, betReturn.Item2);
+                        await ((IUserMessage) sm).ReplyAsync(betReturn.Item1, false, betReturn.Item2);
                         break;
                     case var content when _regex.ListBets.IsMatch(content):
                         var betListReturn = _betting.ListBets(sm);
-                        await sm.Channel.SendMessageAsync(betListReturn.Item1, false, betListReturn.Item2);
+                        await ((IUserMessage) sm).ReplyAsync(betListReturn.Item1, false, betListReturn.Item2);
                         break;
                     case var content when _regex.ViewPlayer.IsMatch(content):
                         var playerReturn = _betting.ViewPlayer(sm);
-                        await sm.Channel.SendMessageAsync(playerReturn.Item1, false, playerReturn.Item2);
+                        await ((IUserMessage) sm).ReplyAsync(playerReturn.Item1, false, playerReturn.Item2);
                         break;
                     case var content when _regex.EditBet.IsMatch(content):
-                        await sm.Channel.SendMessageAsync(_betting.EditBet(sm));
+                        await ((IUserMessage) sm).ReplyAsync(_betting.EditBet(sm));
+                        break;
+                    case var content when _regex.RollDice.IsMatch(content):
+                        await ((IUserMessage) sm).ReplyAsync(RollDice(sm));
                         break;
                 }
             }
@@ -152,21 +155,21 @@ namespace HaggisBotNet
                     {
                         case var content when _regex.RouletteRegex.IsMatch(content):
                             _logger.Info("Playing round of roulette: " + content);
-                            await sm.Channel.SendMessageAsync(_roulette.PlayRound(sm));
+                            await ((IUserMessage) sm).ReplyAsync(_roulette.PlayRound(sm));
                             break;
                         case var content when _regex.RouletteStatsRegex.IsMatch(content):
                             _logger.Info("Getting roulette stats: " + content);
                             var statsReturn = _roulette.GetStats((Int64) sm.Author.Id);
-                            await sm.Channel.SendMessageAsync(statsReturn.Item1, false, statsReturn.Item2);
+                            await ((IUserMessage) sm).ReplyAsync(statsReturn.Item1, false, statsReturn.Item2);
                             break;
                         case var content when _regex.RouletteLeadRegex.IsMatch(content):
                             _logger.Info("Getting roulette leaderboard: " + content);
                             var leadReturn = _roulette.GetLeaders((long) sm.Author.Id);
-                            await sm.Channel.SendMessageAsync(leadReturn.Item1, false, leadReturn.Item2);
+                            await ((IUserMessage) sm).ReplyAsync(leadReturn.Item1, false, leadReturn.Item2);
                             break;
                         case var content when _regex.RouletteSpin.IsMatch(content):
                             _logger.Info("Spinning roulette barrel: " + content);
-                            await sm.Channel.SendMessageAsync(_roulette.SpinBarrel());
+                            await ((IUserMessage) sm).ReplyAsync(_roulette.SpinBarrel());
                             break;
                         // case var content when _regex.RouletteWhip.IsMatch(content):
                         //     _logger.Info("Pistol Whipping Roullete: " + content);
@@ -178,7 +181,7 @@ namespace HaggisBotNet
                         //     break;
                         case var content when _regex.RouletteShootPlayer.IsMatch(content):
                             _logger.Info("Shooting Player Roulette: " + content);
-                            await sm.Channel.SendMessageAsync(_roulette.ShootPlayer(sm));
+                            await ((IUserMessage) sm).ReplyAsync(_roulette.ShootPlayer(sm));
                             break;
                     }
                 }
@@ -223,6 +226,21 @@ namespace HaggisBotNet
 
             _logger.Info("Sending help list: " + sm.Content);
             await sm.Channel.SendMessageAsync(null, false, eb.Build());
+        }
+
+        private String RollDice(SocketMessage sm)
+        {
+            var contents = sm.Content.Split(' ')[1];
+            var roll = contents.Split('d', '+', '-', '*', '/');
+            var random = new Random().Next(Int32.Parse(roll[0]), Int32.Parse(roll[1]));
+            var result = roll.Length == 2 ? random
+                : contents.Contains('+') ? random + Int32.Parse(roll[2])
+                : contents.Contains('-') ? random - Int32.Parse(roll[2])
+                : contents.Contains('*') ? random * Int32.Parse(roll[2])
+                : contents.Contains('/') ? random / Int32.Parse(roll[2])
+                : random;
+
+            return $"Rolled {contents} and got {result}";
         }
     }
 }

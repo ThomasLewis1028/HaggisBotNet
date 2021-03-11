@@ -97,7 +97,7 @@ namespace HaggisBotNet.Games
                 return $"Bet `{bet.Id}` - `{bet.Name}` has already been closed";
 
             if (bet.BookieId != (Int64) sm.Author.Id)
-                return $"<@{sm.Author.Id}> You are not the bookie for bet `{bet.Id}` - `{bet.Name}`";
+                return $"You are not the bookie for bet `{bet.Id}` - `{bet.Name}`";
 
             bet.WinningBet = winningBet;
             bet.IsActive = false;
@@ -214,14 +214,14 @@ namespace HaggisBotNet.Games
                 if (betPoints > better.Points)
                 {
                     return
-                        $"<@{sm.Author.Id}> Your bet of {betPoints} was not added to Bet `{bet.Id}` - `{bet.Name}`\n" +
+                        $"Your bet of {betPoints} was not added to Bet `{bet.Id}` - `{bet.Name}`\n" +
                         $"You only have {better.Points}";
                 }
 
                 if (betPoints < 100)
                 {
                     return
-                        $"<@{sm.Author.Id}> Your bet of {betPoints} was not added to Bet `{bet.Id}` - `{bet.Name}`\n" +
+                        $"Your bet of {betPoints} was not added to Bet `{bet.Id}` - `{bet.Name}`\n" +
                         "Minimum bet is 100";
                 }
 
@@ -239,10 +239,10 @@ namespace HaggisBotNet.Games
 
                 _bettingGame.PlayerBets.Add(playerBet);
                 SerializeData(_bettingGame);
-                return $"<@{sm.Author.Id}> Your bet of {playerBet.Bet} has been added to Bet `{bet.Id}` - `{bet.Name}`";
+                return $"Your bet of {playerBet.Bet} has been added to Bet `{bet.Id}` - `{bet.Name}`";
             }
 
-            return $"<@{sm.Author.Id}> You already have a bet of {playerBet.Bet} on `{bet.Id}` - `{bet.Name}`";
+            return $"You already have a bet of {playerBet.Bet} on `{bet.Id}` - `{bet.Name}`";
         }
 
         /// <summary>

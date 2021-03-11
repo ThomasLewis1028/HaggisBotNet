@@ -45,5 +45,7 @@ namespace HaggisBotNet
         public readonly Regex ViewBet = new Regex("^!(viewBet|betView|vb) \\d.*$", RegexOptions.IgnoreCase);
         public readonly Regex ViewPlayer = new Regex("^!(viewPlayer|playerView|vp)(| <@(!|)(\\d+)>)$", RegexOptions.IgnoreCase);
         public readonly Regex EditBet = new Regex("^!(editBet|betEdit) \\d* (-d \\d{2}/\\d{2}/\\d{4}){1}");
+
+        public readonly Regex RollDice = new Regex("^!r (\\d+d\\d+((|\\+|-|/|\\*))\\d+)$", RegexOptions.IgnoreCase);
     }
 }
