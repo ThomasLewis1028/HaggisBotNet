@@ -206,6 +206,7 @@ namespace HaggisBotNet
             eb.AddField("Help", "help");
             eb.AddField("Ping", "Pong");
             eb.AddField("Convert Temperatures", "temp <Temperature><Unit>");
+            eb.AddField("Roll Dice", "r <numDice>d<diceSides>[(+ | - | / | *)<mod>]");
 
             eb.AddField("Betting",
                 "Create Bet - (createBet | betCreate | cb) <bet title>\n" +
@@ -232,15 +233,28 @@ namespace HaggisBotNet
         {
             var contents = sm.Content.Split(' ')[1];
             var roll = contents.Split('d', '+', '-', '*', '/');
-            var random = new Random().Next(Int32.Parse(roll[0]), Int32.Parse(roll[1]));
-            var result = roll.Length == 2 ? random
-                : contents.Contains('+') ? random + Int32.Parse(roll[2])
-                : contents.Contains('-') ? random - Int32.Parse(roll[2])
-                : contents.Contains('*') ? random * Int32.Parse(roll[2])
-                : contents.Contains('/') ? random / Int32.Parse(roll[2])
-                : random;
+            var rolls = new List<int>();
+            var total = 0;
 
-            return $"Rolled {contents} and got {result}";
+            if (Int32.Parse(roll[0]) > 100)
+                return "Roll less than 100 dice";
+
+            for (int i = 0; i < Int32.Parse(roll[0]); i++)
+            {
+                var random = new Random().Next(1, Int32.Parse(roll[1]) + 1);
+                rolls.Add(random);
+                total += random;
+            }
+            
+            var result = roll.Length == 2 ? total
+                : contents.Contains('+') ? total + Int32.Parse(roll[2])
+                : contents.Contains('-') ? total - Int32.Parse(roll[2])
+                : contents.Contains('*') ? total * Int32.Parse(roll[2])
+                : contents.Contains('/') ? total / Int32.Parse(roll[2])
+                : total;
+
+            return $"Rolled {contents} and got {result}\n" +
+                   $"`[{string.Join(", ",rolls)}]`";
         }
     }
 }
